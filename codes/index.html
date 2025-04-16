@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课堂随机点名工具</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .input-section {
+            flex: 1;
+            padding: 20px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.2);
+            margin-right: 20px;
+        }
+        
+        .display-section {
+            flex: 2;
+            padding: 20px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            overflow: hidden;
+        }
+        
+        h1, h2 {
+            text-align: center;
+            color: #00bcd4;
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+            margin-top: 0;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 300px;
+            background-color: rgba(20, 20, 20, 0.7);
+            border: 1px solid #00bcd4;
+            border-radius: 5px;
+            color: #fff;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: linear-gradient(45deg, #00bcd4, #2196f3);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.5);
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #2196f3, #00bcd4);
+            box-shadow: 0 0 25px rgba(0, 188, 212, 0.7);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            background: gray;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .name-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            max-height: calc(100% - 180px);
+            min-height: 300px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 188, 212, 0.5) rgba(30, 30, 30, 0.5);
+        }
+        
+        .name-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .name-grid::-webkit-scrollbar-track {
+            background: rgba(30, 30, 30, 0.5);
+            border-radius: 4px;
+        }
+        
+        .name-grid::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 188, 212, 0.5);
+            border-radius: 4px;
+        }
+        
+        .name-grid::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 188, 212, 0.8);
+        }
+        
+        .name-card {
+            width: 110px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(40, 40, 40, 0.7);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            transition: all 0.2s;
+            font-size: 16px;
+            text-align: center;
+            padding: 8px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            word-break: break-all;
+        }
+        
+        .name-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(0, 188, 212, 0.2), rgba(33, 150, 243, 0.2));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .name-card:hover::before {
+            opacity: 1;
+        }
+        
+        .highlight {
+            animation: highlight-animation 0.3s ease-out;
+            border-color: #00bcd4;
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.8);
+            transform: scale(1.1);
+            z-index: 1;
+            background-color: rgba(0, 188, 212, 0.3);
+        }
+        
+        .selected {
+            animation: winner-animation 1s infinite alternate;
+            border-color: #ffc107;
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
+            transform: scale(1.15);
+            z-index: 2;
+            background-color: rgba(255, 193, 7, 0.3);
+            font-weight: bold;
+        }
+        
+        @keyframes highlight-animation {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0px rgba(0, 188, 212, 0);
+            }
+            50% {
+                transform: scale(1.15);
+                box-shadow: 0 0 25px rgba(0, 188, 212, 1);
+            }
+            100% {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(0, 188, 212, 0.8);
+            }
+        }
+        
+        @keyframes winner-animation {
+            0% {
+                box-shadow: 0 0 20px rgba(255, 193, 7, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 30px rgba(255, 193, 7, 1);
+            }
+        }
+        
+        .selected-name {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 60px;
+            color: #ffc107;
+            text-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
+        }
+        
+        .result-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .power-meter-container {
+            margin-top: 20px;
+            height: 30px;
+            background-color: rgba(40, 40, 40, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .power-meter {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00bcd4, #2196f3, #f50057);
+            border-radius: 15px;
+            transition: width 0.05s linear;
+        }
+        
+        .power-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+        }
+        
+        .cyber-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.3s;
+            opacity: 0;
+        }
+        
+        .cyber-btn:hover::after {
+            animation: cyber-shine 1.5s;
+        }
+        
+        @keyframes cyber-shine {
+            0% {
+                left: -50%;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                left: 150%;
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .input-section {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+        }
+        
+        .power-label {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 18px;
+            color: #00bcd4;
+        }
+        
+        .speed-indicator {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 10px;
+            color: #f50057;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        
+        @media (min-width: 769px) {
+            .name-grid.small-cards .name-card {
+                width: 90px;
+                height: 60px;
+                font-size: 14px;
+                padding: 5px;
+            }
+            
+            .name-grid.tiny-cards .name-card {
+                width: 80px;
+                height: 50px;
+                font-size: 12px;
+                padding: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-section">
+            <h2>学生名单</h2>
+            <textarea id="nameList" placeholder="请输入学生名单，每行一个名字...
+例如：
+张三
+李四
+王五"></textarea>
+            <div class="power-label">蓄力进度</div>
+            <div class="power-meter-container">
+                <div class="power-meter" id="powerMeter"></div>
+                <div class="power-text" id="powerText">0%</div>
+            </div>
+            <button id="powerBtn" class="cyber-btn">按住蓄力，松开发射</button>
+        </div>
+        <div class="display-section">
+            <h1>课堂随机点名</h1>
+            <div class="speed-indicator" id="speedIndicator"></div>
+            <div class="name-grid" id="nameGrid"></div>
+            <div class="result-section">
+                <div id="selectedName" class="selected-name"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nameListTextarea = document.getElementById('nameList');
+        const nameGrid = document.getElementById('nameGrid');
+        const powerBtn = document.getElementById('powerBtn');
+        const powerMeter = document.getElementById('powerMeter');
+        const powerText = document.getElementById('powerText');
+        const selectedNameDiv = document.getElementById('selectedName');
+        const speedIndicator = document.getElementById('speedIndicator');
+        
+        let nameCards = [];
+        let selecting = false;
+        let selectionInterval;
+        let powerInterval;
+        let power = 0;
+        let powerStartTime = 0;
+        let highlightIndex = 0;
+        
+        // 加载页面时，从本地存储恢复名单
+        window.addEventListener('load', () => {
+            const savedNames = localStorage.getItem('studentNames');
+            if (savedNames) {
+                nameListTextarea.value = savedNames;
+            }
+        });
+        
+        // 获取名字列表
+        function getNameList() {
+            const text = nameListTextarea.value.trim();
+            if (!text) return [];
+            
+            return text.split('\n')
+                .map(name => name.trim())
+                .filter(name => name.length > 0);
+        }
+        
+        // 创建名字卡片
+        function createNameCards(names) {
+            nameGrid.innerHTML = '';
+            nameCards = [];
+            
+            // 根据名字数量自动调整卡片大小的类
+            nameGrid.classList.remove('small-cards', 'tiny-cards');
+            
+            if (names.length > 30) {
+                nameGrid.classList.add('tiny-cards');
+            } else if (names.length > 20) {
+                nameGrid.classList.add('small-cards');
+            }
+            
+            names.forEach(name => {
+                const card = document.createElement('div');
+                card.className = 'name-card';
+                card.textContent = name;
+                nameGrid.appendChild(card);
+                nameCards.push(card);
+            });
+            
+            // 自动滚动到顶部
+            nameGrid.scrollTop = 0;
+        }
+        
+        // 蓄力按钮按下事件
+        powerBtn.addEventListener('mousedown', startPower);
+        powerBtn.addEventListener('touchstart', startPower);
+        
+        // 蓄力按钮释放事件
+        powerBtn.addEventListener('mouseup', releasePower);
+        powerBtn.addEventListener('touchend', releasePower);
+        powerBtn.addEventListener('mouseleave', releasePower);
+        
+        // 开始蓄力
+        function startPower(e) {
+            e.preventDefault(); // 防止触摸事件默认行为
+            
+            // 检查是否已经在选择过程中
+            if (selecting) return;
+            
+            // 检查是否有足够的名字
+            const nameList = getNameList();
+            if (nameList.length < 2) {
+                alert('请至少输入两个名字！');
+                return;
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('studentNames', nameListTextarea.value);
+            
+            // 创建名字卡片
+            createNameCards(nameList);
+            
+            // 重置蓄力值
+            power = 0;
+            powerStartTime = Date.now();
+            updatePowerMeter();
+            
+            // 开始蓄力计时器
+            powerInterval = setInterval(() => {
+                // 计算蓄力值 (0-100)
+                const elapsedTime = Date.now() - powerStartTime;
+                power = Math.min(100, Math.floor(elapsedTime / 20)); // 2秒到达最大值
+                updatePowerMeter();
+            }, 20);
+        }
+        
+        // 释放蓄力
+        function releasePower(e) {
+            if (!powerInterval) return;
+            
+            // 清除蓄力计时器
+            clearInterval(powerInterval);
+            powerInterval = null;
+            
+            // 如果蓄力过小，不执行
+            if (power < 5) {
+                power = 0;
+                updatePowerMeter();
+                return;
+            }
+            
+            // 开始选择过程
+            startSelection();
+        }
+        
+        // 更新蓄力指示器
+        function updatePowerMeter() {
+            powerMeter.style.width = power + '%';
+            powerText.textContent = power + '%';
+        }
+        
+        // 开始选择
+        function startSelection() {
+            selecting = true;
+            selectedNameDiv.textContent = '';
+            
+            // 确保之前的定时器已清除
+            if (selectionInterval) {
+                clearInterval(selectionInterval);
+            }
+            
+            // 清除之前的选择状态
+            nameCards.forEach(card => {
+                card.classList.remove('highlight', 'selected');
+            });
+            
+            // 计算初始速度 - 根据蓄力值确定
+            // 范围：10ms（最快）到 100ms（最慢）
+            let speed = Math.max(10, 100 - power * 0.9);
+            
+            // 生成随机衰减系数 - 确保整个过程不超过5秒
+            // 使用指数衰减模型: speed = initialSpeed * e^(decayRate * t)
+            // 我们需要确保在5秒内速度衰减到point，所以:
+            // endSpeed = initialSpeed * e^(decayRate * 5)
+            // 解得: decayRate = ln(endSpeed/initialSpeed) / 5
+            const endSpeed = 800; // 结束时的速度阈值
+            const maxTime = 5; // 最大时间（秒）
+            const decayRate = Math.log(endSpeed / speed) / maxTime;
+            
+            // 初始化变量 - 随机起始位置
+            highlightIndex = nameCards.length > 0 ? Math.floor(Math.random() * nameCards.length) : 0;
+            let startTime = Date.now();
+            let currentSpeed = speed;
+            
+            // 显示初始速度
+            speedIndicator.textContent = `初始速度: ${Math.floor(1000/currentSpeed)}次/秒`;
+            
+            // 先立即将第一个高亮的名片添加高亮效果并滚动到可视区域
+            if (nameCards.length > 0) {
+                const firstCard = nameCards[highlightIndex];
+                firstCard.classList.add('highlight');
+                
+                // 立即滚动到起始随机位置
+                setTimeout(() => {
+                    ensureCardVisible(firstCard);
+                }, 50); // 短暂延迟确保DOM已更新
+            }
+            
+            // 创建动画帧函数
+            function animate() {
+                // 计算经过的时间（秒）
+                const elapsed = (Date.now() - startTime) / 1000;
+                
+                // 更新当前速度（使用指数衰减）
+                currentSpeed = speed * Math.exp(decayRate * elapsed);
+                
+                // 如果速度已经衰减到足够慢，停止动画
+                if (currentSpeed >= endSpeed || elapsed >= maxTime) {
+                    finishSelection();
+                    return;
+                }
+                
+                // 清除所有之前的高亮
+                nameCards.forEach(card => card.classList.remove('highlight'));
+                
+                // 添加当前高亮
+                const currentCard = nameCards[highlightIndex % nameCards.length];
+                currentCard.classList.add('highlight');
+                
+                // 确保当前高亮的卡片在视野内（现在对所有速度都应用此逻辑，但为了性能，仍限制更新频率）
+                if (currentSpeed > 50 || Math.random() < 0.05) { // 快速时随机抽样滚动
+                    ensureCardVisible(currentCard);
+                }
+                
+                // 更新高亮索引
+                highlightIndex = (highlightIndex + 1) % nameCards.length;
+                
+                // 根据当前速度设置下一帧延迟
+                selectionInterval = setTimeout(animate, currentSpeed);
+                
+                // 每0.5秒更新一次速度显示
+                if (Math.floor(elapsed * 2) > Math.floor((elapsed - currentSpeed/1000) * 2)) {
+                    speedIndicator.textContent = `当前速度: ${Math.floor(1000/currentSpeed)}次/秒`;
+                }
+            }
+            
+            // 稍微延迟启动，让第一个高亮的卡片有时间滚动到视图中
+            setTimeout(() => {
+                // 启动动画
+                animate();
+            }, 100);
+        }
+        
+        // 确保卡片在可视区域内
+        function ensureCardVisible(card) {
+            if (!card) return;
+            
+            const cardRect = card.getBoundingClientRect();
+            const gridRect = nameGrid.getBoundingClientRect();
+            
+            // 卡片上边缘在视野上方
+            if (cardRect.top < gridRect.top) {
+                nameGrid.scrollBy({
+                    top: cardRect.top - gridRect.top - 20,
+                    behavior: 'smooth'
+                });
+            }
+            // 卡片下边缘在视野下方
+            else if (cardRect.bottom > gridRect.bottom) {
+                nameGrid.scrollBy({
+                    top: cardRect.bottom - gridRect.bottom + 20,
+                    behavior: 'smooth'
+                });
+            }
+        }
+        
+        // 完成选择
+        function finishSelection() {
+            if (!selecting) return;
+            
+            selecting = false;
+            
+            // 清除所有定时器
+            if (selectionInterval) {
+                clearTimeout(selectionInterval);
+                selectionInterval = null;
+            }
+            
+            // 清除所有高亮
+            nameCards.forEach(card => card.classList.remove('highlight'));
+            
+            // 速度指示器显示完成
+            speedIndicator.textContent = '选择完成！';
+            
+            // 选中最后高亮的名字
+            const finalSelectedIndex = (highlightIndex - 1 + nameCards.length) % nameCards.length;
+            const selectedCard = nameCards[finalSelectedIndex];
+            
+            // 高亮选中者
+            selectedCard.classList.add('selected');
+            
+            // 确保选中的卡片在视野内
+            ensureCardVisible(selectedCard);
+            
+            // 显示选中名字
+            selectedNameDiv.textContent = `被点到的同学：${selectedCard.textContent}`;
+            
+            // 重置蓄力条
+            power = 0;
+            updatePowerMeter();
+        }
+    </script>
+</body>
+</html> 

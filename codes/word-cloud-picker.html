@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D球形词云点名器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background: #1a1a2e;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #c1f0f6;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+            margin-top: 20px;
+        }
+        
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        
+        .input-panel {
+            flex: 1;
+            background: rgba(25, 30, 60, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            min-width: 320px;
+            max-width: 400px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(20, 25, 45, 0.8);
+            border: 1px solid #3a4a6b;
+            border-radius: 8px;
+            color: #fff;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+        }
+        
+        .cloud-container {
+            flex: 2;
+            background: rgba(25, 30, 60, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        #tag-cloud-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #tagcloud {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        .tagcloud--item {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px rgba(0, 200, 255, 0.4);
+            cursor: pointer;
+            transition: color 0.3s;
+            white-space: nowrap;
+            will-change: transform, opacity, color;
+        }
+        
+        .tagcloud--item:hover {
+            color: #00bcd4 !important;
+            text-shadow: 0 0 15px rgba(0, 188, 212, 0.8);
+        }
+        
+        .tagcloud--item.highlight {
+            color: #ffeb3b !important;
+            text-shadow: 0 0 15px rgba(255, 235, 59, 0.8);
+            font-size: 1.2em !important;
+        }
+        
+        .tagcloud--item.selected {
+            color: #ff5722 !important;
+            text-shadow: 0 0 20px rgba(255, 87, 34, 0.9);
+            font-size: 1.5em !important;
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); }
+        }
+        
+        .settings {
+            margin-bottom: 20px;
+        }
+        
+        .setting-item {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #c1f0f6;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            background: #2c3e50;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #00bcd4;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 188, 212, 0.5);
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #4CAF50, #009688);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        }
+        
+        .start-btn:hover {
+            background: linear-gradient(45deg, #43A047, #00897B);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .stop-btn {
+            background: linear-gradient(45deg, #F44336, #E91E63);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+        }
+        
+        .stop-btn:hover {
+            background: linear-gradient(45deg, #E53935, #D81B60);
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .result {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background: rgba(25, 30, 60, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff5722;
+            text-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
+            opacity: 0;
+            transition: all 0.5s;
+            text-align: center;
+            z-index: 100;
+            max-width: 90%;
+        }
+        
+        .result.show {
+            opacity: 1;
+            transform: translate(-50%, -10px);
+        }
+        
+        .range-value {
+            float: right;
+            color: #fff;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .input-panel {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 20px;
+                max-width: none;
+            }
+            
+            .cloud-container {
+                min-height: 400px;
+            }
+        }
+        
+        /* 调试信息样式 */
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #00e5ff;
+            border-radius: 4px;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>3D球形词云点名</h1>
+    </header>
+    
+    <div class="container">
+        <div class="input-panel">
+            <textarea id="nameList" placeholder="请输入学生名单，每行一个名字...
+例如：
+张三
+李四
+王五"></textarea>
+            
+            <div class="settings">
+                <div class="setting-item">
+                    <label for="rotationSpeed">旋转速度 <span class="range-value" id="speedValue">5</span></label>
+                    <input type="range" id="rotationSpeed" min="1" max="10" value="5">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="selectionDuration">选择时长 (秒) <span class="range-value" id="durationValue">3</span></label>
+                    <input type="range" id="selectionDuration" min="1" max="10" value="3">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="cloudRadius">球形大小 <span class="range-value" id="radiusValue">8</span></label>
+                    <input type="range" id="cloudRadius" min="5" max="15" value="8">
+                </div>
+            </div>
+            
+            <div class="button-container">
+                <button id="startBtn" class="start-btn">开始点名</button>
+                <button id="stopBtn" class="stop-btn" disabled>停止</button>
+            </div>
+        </div>
+        
+        <div class="cloud-container" id="cloudContainer">
+            <div id="tag-cloud-container">
+                <div id="tagcloud" class="tagcloud"></div>
+            </div>
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+    
+    <div class="debug-info" id="debugInfo"></div>
+    
+    <!-- 嵌入TagCloud.js代码 -->
+    <script>
+        /**
+         * TagCloud.js (Modified for better 3D effect)
+         * Based on: https://github.com/mcc108/TagCloud
+         */
+        (function(global) {
+            function TagCloud(container, texts, options) {
+                const self = this;
+                
+                // 支持字符串选择器作为容器参数
+                if (typeof container === 'string') {
+                    container = document.querySelector(container);
+                }
+                
+                if (!container || container.nodeType !== 1) {
+                    return new TagCloud(document.getElementsByClassName('tagcloud')[0], texts, options);
+                }
+                
+                self.container = container;
+                self.texts = texts || [];
+                self.options = options || {};
+                
+                self.size = self.options.size === undefined ? 100 : self.options.size;
+                self.radius = self.options.radius === undefined 
+                    ? self.size / 2 
+                    : self.options.radius;
+                self.maxSpeed = self.options.maxSpeed === undefined ? 8 : self.options.maxSpeed;
+                self.initSpeed = self.options.initSpeed === undefined ? 2 : self.options.initSpeed;
+                self.direction = self.options.direction === undefined ? 135 : self.options.direction;
+                self.keep = self.options.keep === undefined ? true : self.options.keep;
+                self.pause = self.options.pause === undefined ? false : self.options.pause;
+                
+                // 初始化鼠标位置为0，以确保平滑启动
+                self.mouseX = 0;
+                self.mouseY = 0;
+                
+                // 添加启动动画控制
+                self.startTime = Date.now();
+                self.startDuration = self.options.startDuration === undefined ? 1500 : self.options.startDuration;
+                
+                // 初始速度系数，开始时为0，随时间增加
+                self.initSpeedFactor = 0;
+                
+                if (!self.pause) {
+                    self.timer = setTimeout(function() {
+                        self.init();
+                    }, 0);
+                }
+                
+                return self;
+            }
+
+            TagCloud.prototype = {
+                constructor: TagCloud,
+
+                init: function() {
+                    // 设置实例属性
+                    this.depth = 2 * this.radius;
+                    this.size = this.size || 1.5 * this.radius;
+                    this.active = false;  // 是否处于动画中
+
+                    // 设置容器样式
+                    if (this.options.useContainerInlineStyles !== false) {
+                        this.container.style.position = 'relative';
+                        this.container.style.width = '100%';
+                        this.container.style.height = '100%';
+                        this.container.style.minHeight = '400px';
+                        this.container.style.overflow = 'hidden';
+                    }
+
+                    // 创建标签
+                    this.items = [];
+                    this.createTextElements();
+
+                    // 事件绑定
+                    this.addEventListeners();
+
+                    // 更新视图
+                    this.update();
+
+                    // 开始动画
+                    this.animate();
+                },
+
+                createTextElements: function() {
+                    // 清空容器
+                    this.container.innerHTML = '';
+
+                    const useItemInlineStyles = this.options.useItemInlineStyles !== false;
+                    const itemClass = this.options.itemClass || 'tagcloud--item';
+
+                    // 创建每个标签项
+                    this.texts.forEach((text) => {
+                        const item = document.createElement('div');
+                        item.className = itemClass;
+                        item.innerHTML = text;
+
+                        if (useItemInlineStyles) {
+                            item.style.position = 'absolute';
+                            item.style.top = '50%';
+                            item.style.left = '50%';
+                            item.style.zIndex = 1;
+                            item.style.filter = 'alpha(opacity=0)';
+                            item.style.opacity = 0;
+                            item.style.whiteSpace = 'nowrap';
+                            item.style.willChange = 'transform, opacity, color';
+                            item.style.cursor = 'pointer';
+                        }
+
+                        const itemObj = {
+                            el: item,
+                            x: 0,       // x坐标
+                            y: 0,       // y坐标
+                            z: 0,       // z坐标
+                            a: 0,       // 天顶角度
+                            b: 0,       // 方位角度
+                            opacity: 0, // 透明度
+                            scale: 0,   // 缩放比例
+                            color: 0    // 颜色渐变值
+                        };
+
+                        this.items.push(itemObj);
+                        this.container.appendChild(item);
+                    });
+
+                    // 初始化位置
+                    this.initPosition();
+                },
+
+                initPosition: function() {
+                    const phi = Math.PI * (3 - Math.sqrt(5)); // 黄金角
+                    const count = this.items.length;
+
+                    // 使用黄金角方法均匀分布在球面上
+                    this.items.forEach((item, i) => {
+                        const y = 1 - (i / (count - 1)) * 2; // y goes from 1 to -1
+                        const radius = Math.sqrt(1 - y * y); // radius at y
+                        const theta = phi * i; // golden angle increment
+
+                        item.x = Math.cos(theta) * radius;
+                        item.y = y;
+                        item.z = Math.sin(theta) * radius;
+
+                        // 转换为球坐标
+                        item.a = Math.acos(item.y / 1); // 天顶角
+                        item.b = Math.atan2(item.z, item.x); // 方位角
+                    });
+                },
+
+                addEventListeners: function() {
+                    const self = this;
+                    
+                    // 鼠标移动事件
+                    this.container.addEventListener('mousemove', function(e) {
+                        if (self.active) {
+                            const rect = self.container.getBoundingClientRect();
+                            const mouseX = e.clientX - rect.left - rect.width / 2;
+                            const mouseY = e.clientY - rect.top - rect.height / 2;
+                            
+                            // 平滑过渡鼠标位置，避免突变
+                            if (self.mouseX === 0 && self.mouseY === 0) {
+                                self.mouseX = mouseX / self.size * 2;
+                                self.mouseY = -mouseY / self.size * 2;
+                            } else {
+                                self.mouseX = self.mouseX * 0.8 + (mouseX / self.size * 2) * 0.2;
+                                self.mouseY = self.mouseY * 0.8 + (-mouseY / self.size * 2) * 0.2;
+                            }
+                        }
+                    });
+
+                    // 鼠标离开事件
+                    this.container.addEventListener('mouseleave', function() {
+                        if (self.active && !self.keep) {
+                            // 平滑过渡到0
+                            const slowReturn = function() {
+                                if (Math.abs(self.mouseX) < 0.01 && Math.abs(self.mouseY) < 0.01) {
+                                    self.mouseX = 0;
+                                    self.mouseY = 0;
+                                    return;
+                                }
+                                
+                                self.mouseX *= 0.95;
+                                self.mouseY *= 0.95;
+                                requestAnimationFrame(slowReturn);
+                            };
+                            slowReturn();
+                        }
+                    });
+
+                    // 窗口大小改变事件
+                    window.addEventListener('resize', function() {
+                        self.resizeHandler();
+                    });
+                    
+                    // 初始化大小
+                    this.resizeHandler();
+                },
+
+                resizeHandler: function() {
+                    const { offsetWidth, offsetHeight } = this.container;
+                    const radius = Math.min(offsetWidth, offsetHeight) / 2 * 0.8;
+                    
+                    // 调整大小比例
+                    this.radius = radius;
+                    this.size = 1.5 * radius;
+                    this.depth = 2 * radius;
+                },
+
+                update: function() {
+                    const direction = this.direction * Math.PI / 180;
+                    const sin = Math.sin(direction);
+                    const cos = Math.cos(direction);
+                    
+                    const initSpeed = this.initSpeed;
+                    // 基础速度比初始速度慢，提供更平滑的体验
+                    const baseSpeed = initSpeed * 0.2;
+                    
+                    // 计算启动动画的平滑因子
+                    const now = Date.now();
+                    const elapsed = now - this.startTime;
+                    this.initSpeedFactor = Math.min(1, elapsed / this.startDuration);
+                    
+                    // 如果有鼠标控制
+                    if (this.mouseX !== undefined && this.mouseY !== undefined) {
+                        // 当鼠标移动时，使用鼠标位置计算旋转速度
+                        // 如果鼠标位置非常小，则使用基础速度
+                        const isMouseActive = Math.abs(this.mouseX) > 0.01 || Math.abs(this.mouseY) > 0.01;
+                        
+                        if (isMouseActive) {
+                            // 平滑过渡当前旋转速度和目标旋转速度
+                            const targetRotateX = this.mouseY * 0.2;
+                            const targetRotateY = this.mouseX * 0.2;
+                            
+                            if (this.rotateX === undefined) this.rotateX = 0;
+                            if (this.rotateY === undefined) this.rotateY = 0;
+                            
+                            // 平滑过渡
+                            this.rotateX = this.rotateX * 0.9 + targetRotateX * 0.1;
+                            this.rotateY = this.rotateY * 0.9 + targetRotateY * 0.1;
+                        } else {
+                            // 鼠标接近静止状态，使用基础旋转
+                            this.rotateX = baseSpeed * cos * this.initSpeedFactor;
+                            this.rotateY = baseSpeed * sin * this.initSpeedFactor;
+                        }
+                    } else {
+                        // 没有鼠标控制时，使用基础速度
+                        this.rotateX = baseSpeed * cos * this.initSpeedFactor;
+                        this.rotateY = baseSpeed * sin * this.initSpeedFactor;
+                    }
+                },
+
+                animate: function() {
+                    const self = this;
+                    const { depth, size } = this;
+                    
+                    // 标记为活动状态
+                    this.active = true;
+                    
+                    // 限制最大旋转速度，防止过快旋转
+                    const maxRotationSpeed = 0.1;
+                    
+                    // 动画帧
+                    function step() {
+                        if (!self.active) return;
+                        
+                        // 更新旋转角度
+                        self.update();
+                        
+                        // 限制旋转速度
+                        self.rotateX = Math.max(-maxRotationSpeed, Math.min(maxRotationSpeed, self.rotateX));
+                        self.rotateY = Math.max(-maxRotationSpeed, Math.min(maxRotationSpeed, self.rotateY));
+                        
+                        // 逐个更新标签位置
+                        self.items.forEach((item) => {
+                            // 围绕x轴旋转
+                            const ay = item.a + self.rotateX * 0.05;
+                            // 围绕y轴旋转
+                            const az = item.b + self.rotateY * 0.05;
+                            
+                            const sa = Math.sin(ay);
+                            const ca = Math.cos(ay);
+                            const sb = Math.sin(az);
+                            const cb = Math.cos(az);
+                            
+                            const newX = sa * sb;
+                            const newY = ca;
+                            const newZ = sa * cb;
+                            
+                            // 更新球坐标
+                            item.a = ay;
+                            item.b = az;
+                            item.x = newX;
+                            item.y = newY;
+                            item.z = newZ;
+                            
+                            // 计算透明度和缩放比例
+                            const scale = (newZ + 1) * 0.5; // z范围从-1到1，转换为0到1
+                            const opacity = scale;
+                            const fontSize = scale * 0.8 + 0.7; // 字体大小范围从0.7到1.5
+                            
+                            // 计算颜色渐变
+                            const hue = 200 + Math.floor(scale * 60); // 从蓝色到青色
+                            const saturation = 80 + Math.floor(scale * 20); // 增加饱和度
+                            const lightness = 70 + Math.floor(scale * 10); // 增加亮度
+                            const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                            
+                            // 更新视觉属性
+                            item.opacity = opacity;
+                            item.scale = fontSize;
+                            item.color = color;
+                            
+                            // 应用到DOM元素
+                            const el = item.el;
+                            const left = (newX * size) / 2;
+                            const top = (newY * size) / 2;
+                            
+                            // 应用变换
+                            el.style.transform = `translate3d(${left}px, ${top}px, 0) scale(${fontSize})`;
+                            el.style.opacity = opacity;
+                            el.style.zIndex = Math.floor(opacity * 100);
+                            
+                            // 应用颜色渐变
+                            if (!el.classList.contains('highlight') && !el.classList.contains('selected')) {
+                                el.style.color = color;
+                            }
+                        });
+                        
+                        // 继续下一帧
+                        requestAnimationFrame(step);
+                    }
+                    
+                    step();
+                },
+                
+                stop: function() {
+                    this.active = false;
+                },
+                
+                start: function() {
+                    this.active = true;
+                    this.animate();
+                },
+                
+                setSpeed: function(newSpeed) {
+                    this.initSpeed = newSpeed;
+                    this.maxSpeed = newSpeed * 2;
+                },
+                
+                setTexts: function(texts) {
+                    this.texts = texts;
+                    this.stop();
+                    this.createTextElements();
+                    this.start();
+                }
+            };
+
+            // 暴露到全局
+            global.TagCloud = TagCloud;
+        })(window);
+    </script>
+    
+    <!-- 应用逻辑代码 -->
+    <script>
+        const nameListTextarea = document.getElementById('nameList');
+        const cloudContainer = document.getElementById('cloudContainer');
+        const tagCloudElement = document.getElementById('tagcloud');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resultDiv = document.getElementById('result');
+        const rotationSpeedSlider = document.getElementById('rotationSpeed');
+        const selectionDurationSlider = document.getElementById('selectionDuration');
+        const cloudRadiusSlider = document.getElementById('cloudRadius');
+        const speedValue = document.getElementById('speedValue');
+        const durationValue = document.getElementById('durationValue');
+        const radiusValue = document.getElementById('radiusValue');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        let tagCloudInstance = null;
+        let nameItems = [];
+        let selecting = false;
+        let autoStopTimeout;
+        let highlightInterval;
+        let currentHighlightIndex = -1;
+        
+        // 调试日志
+        function debugLog(message) {
+            if (debugInfo) {
+                debugInfo.style.display = 'block';
+                debugInfo.textContent = message;
+                console.log('[DEBUG]', message);
+                
+                // 5秒后自动隐藏
+                setTimeout(() => {
+                    debugInfo.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // 加载页面时，从本地存储恢复名单
+        window.addEventListener('load', () => {
+            const savedNames = localStorage.getItem('sphereCloudNames');
+            if (savedNames) {
+                nameListTextarea.value = savedNames;
+            }
+            
+            // 更新滑块值显示
+            rotationSpeedSlider.addEventListener('input', () => {
+                speedValue.textContent = rotationSpeedSlider.value;
+                if (tagCloudInstance) {
+                    updateCloudSpeed();
+                }
+            });
+            
+            selectionDurationSlider.addEventListener('input', () => {
+                durationValue.textContent = selectionDurationSlider.value;
+            });
+            
+            cloudRadiusSlider.addEventListener('input', () => {
+                radiusValue.textContent = cloudRadiusSlider.value;
+                if (tagCloudInstance) {
+                    createTagCloud();
+                }
+            });
+            
+            // 立即调用一次以更新默认值显示
+            speedValue.textContent = rotationSpeedSlider.value;
+            durationValue.textContent = selectionDurationSlider.value;
+            radiusValue.textContent = cloudRadiusSlider.value;
+            
+            // 检查是否有预设名单
+            if (nameListTextarea.value.trim()) {
+                createTagCloud();
+            }
+        });
+        
+        // 开始按钮点击事件
+        startBtn.addEventListener('click', () => {
+            if (selecting) return;
+            
+            const nameList = getNameList();
+            if (nameList.length < 2) {
+                alert('请至少输入两个名字！');
+                return;
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('sphereCloudNames', nameListTextarea.value);
+            
+            // 创建或更新词云
+            createTagCloud();
+            
+            // 启动选择动画
+            startSelection();
+            
+            // 更新按钮状态
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            // 隐藏结果
+            resultDiv.classList.remove('show');
+            
+            // 设置自动停止
+            const duration = parseInt(selectionDurationSlider.value) * 1000;
+            autoStopTimeout = setTimeout(() => {
+                if (selecting) {
+                    stopSelection();
+                }
+            }, duration);
+        });
+        
+        // 停止按钮点击事件
+        stopBtn.addEventListener('click', () => {
+            if (!selecting) return;
+            stopSelection();
+        });
+        
+        // 获取名字列表
+        function getNameList() {
+            const text = nameListTextarea.value.trim();
+            if (!text) return [];
+            
+            return text.split('\n')
+                .map(name => name.trim())
+                .filter(name => name.length > 0);
+        }
+        
+        // 创建标签云
+        function createTagCloud() {
+            // 获取名单
+            const nameList = getNameList();
+            if (nameList.length < 2) return;
+            
+            // 停止现有实例
+            if (tagCloudInstance) {
+                try {
+                    tagCloudInstance.stop();
+                    tagCloudInstance = null;
+                } catch (e) {
+                    console.error('Error destroying TagCloud:', e);
+                    debugLog('Error destroying TagCloud: ' + e.message);
+                }
+            }
+            
+            // 清除高亮
+            if (highlightInterval) {
+                clearInterval(highlightInterval);
+                highlightInterval = null;
+            }
+            
+            // 更新名字列表
+            nameItems = nameList;
+            
+            try {
+                // 创建标签云实例
+                const radius = parseInt(cloudRadiusSlider.value) * 30; // 基础大小系数
+                const speed = parseInt(rotationSpeedSlider.value);
+                
+                // 创建新实例
+                tagCloudInstance = new TagCloud('#tagcloud', nameItems, {
+                    radius: radius,
+                    maxSpeed: speed * 2,
+                    initSpeed: speed,
+                    direction: 135,
+                    keep: true
+                });
+                
+                // 调整外观
+                adjustAppearance();
+                
+                debugLog('TagCloud created successfully with ' + nameItems.length + ' items');
+            } catch (e) {
+                console.error('Error creating TagCloud:', e);
+                debugLog('Error creating TagCloud: ' + e.message);
+            }
+        }
+        
+        // 更新云的速度
+        function updateCloudSpeed() {
+            if (!tagCloudInstance) return;
+            
+            const speed = parseInt(rotationSpeedSlider.value);
+            tagCloudInstance.setSpeed(speed);
+        }
+        
+        // 调整外观
+        function adjustAppearance() {
+            const cloudContainer = document.getElementById('cloudContainer');
+            const containerWidth = cloudContainer.offsetWidth;
+            const containerHeight = cloudContainer.offsetHeight;
+            
+            // 根据容器大小调整字体大小
+            const baseFontSize = Math.min(containerWidth, containerHeight) / 25;
+            document.documentElement.style.setProperty('--cloud-font-size', baseFontSize + 'px');
+        }
+        
+        // 启动选择动画
+        function startSelection() {
+            if (selecting || nameItems.length < 2) return;
+            
+            selecting = true;
+            
+            // 清除之前的高亮
+            clearHighlights();
+            
+            // 启动高亮动画
+            const highlightSpeed = 100; // 每100毫秒切换一次高亮
+            currentHighlightIndex = Math.floor(Math.random() * nameItems.length);
+            
+            highlightInterval = setInterval(() => {
+                clearHighlights();
+                
+                // 选择下一个随机索引
+                currentHighlightIndex = Math.floor(Math.random() * nameItems.length);
+                
+                // 添加高亮效果
+                const items = document.querySelectorAll('.tagcloud--item');
+                if (items[currentHighlightIndex]) {
+                    items[currentHighlightIndex].classList.add('highlight');
+                }
+            }, highlightSpeed);
+        }
+        
+        // 停止选择动画
+        function stopSelection() {
+            if (!selecting) return;
+            
+            selecting = false;
+            
+            // 清除定时器
+            if (autoStopTimeout) {
+                clearTimeout(autoStopTimeout);
+                autoStopTimeout = null;
+            }
+            
+            if (highlightInterval) {
+                clearInterval(highlightInterval);
+                highlightInterval = null;
+            }
+            
+            // 清除高亮
+            clearHighlights();
+            
+            // 随机选择一个名字
+            const selectedIndex = Math.floor(Math.random() * nameItems.length);
+            const selectedName = nameItems[selectedIndex];
+            
+            // 显示结果
+            resultDiv.textContent = selectedName;
+            resultDiv.classList.add('show');
+            
+            // 标记选中项
+            const items = document.querySelectorAll('.tagcloud--item');
+            if (items[selectedIndex]) {
+                items[selectedIndex].classList.add('selected');
+            }
+            
+            // 更新按钮状态
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+        
+        // 清除所有高亮
+        function clearHighlights() {
+            const items = document.querySelectorAll('.tagcloud--item');
+            items.forEach(item => {
+                item.classList.remove('highlight');
+                item.classList.remove('selected');
+            });
+        }
+        
+        // 窗口尺寸变化时调整
+        window.addEventListener('resize', () => {
+            if (tagCloudInstance) {
+                adjustAppearance();
+            }
+        });
+    </script>
+</body>
+</html> 
