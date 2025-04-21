@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "word": "serendipity",
+    "phonetic": "/ˌser.ənˈdɪp.ə.ti/",
+    "meaning": "偶然发现美好事物的天赋",
+    "example": "Meeting you was pure serendipity.",
+    "video": "serendipity.mp4",
+    "image": "serendipity.jpg",
+    "movieClip": "The movie 'Serendipity' features this concept beautifully."
+  },
+  {
+    "id": 2,
+    "word": "ephemeral",
+    "phonetic": "/ɪˈfem.ər.əl/",
+    "meaning": "短暂的，瞬息即逝的",
+    "example": "The beauty of cherry blossoms is ephemeral.",
+    "video": "ephemeral.mp4",
+    "image": "ephemeral.jpg",
+    "movieClip": "In 'American Beauty', the plastic bag scene represents ephemeral beauty."
+  },
+  {
+    "id": 3,
+    "word": "quintessential",
+    "phonetic": "/ˌkwɪn.təˈsen.ʃəl/",
+    "meaning": "典型的，精髓的",
+    "example": "He is the quintessential English gentleman.",
+    "video": "quintessential.mp4",
+    "image": "quintessential.jpg",
+    "movieClip": "Mr. Darcy in 'Pride and Prejudice' is the quintessential romantic hero."
+  },
+  {
+    "id": 4,
+    "word": "mellifluous",
+    "phonetic": "/məˈlɪf.lu.əs/",
+    "meaning": "悦耳的，如蜜般甜美的",
+    "example": "She has a mellifluous voice that captivates the audience.",
+    "video": "mellifluous.mp4",
+    "image": "mellifluous.jpg",
+    "movieClip": "Morgan Freeman's mellifluous voice narration in 'The Shawshank Redemption'."
+  },
+  {
+    "id": 5,
+    "word": "bioluminescence",
+    "phonetic": "/ˌbaɪ.oʊ.luː.məˈnes.əns/",
+    "meaning": "生物发光",
+    "example": "The ocean was full of bioluminescent plankton at night.",
+    "video": "bioluminescence.mp4",
+    "image": "bioluminescence.jpg",
+    "movieClip": "The magical forest scene in 'Avatar' shows beautiful bioluminescence."
+  }
+] 

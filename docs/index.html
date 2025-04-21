@@ -1,5 +1,236 @@
-<html>
-  <body>
-    hello laoshinihao
-  </body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老师你好 - 教学工具集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3498db, #2574a9);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .intro {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .intro h2 {
+            color: #2574a9;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .intro p {
+            font-size: 1.1rem;
+            color: #555;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 2rem;
+        }
+        
+        .tool-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tool-icon {
+            height: 180px;
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: #2574a9;
+        }
+        
+        .tool-icon.random-card {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .tool-icon.word-cloud {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .tool-icon.timer {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        
+        .tool-icon.word-card {
+            background-color: #f3e5f5;
+            color: #6a1b9a;
+        }
+        
+        .tool-info {
+            padding: 1.5rem;
+        }
+        
+        .tool-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: #2574a9;
+        }
+        
+        .tool-info p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tool-info .btn {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            background-color: #2574a9;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        
+        .tool-info .btn:hover {
+            background-color: #3498db;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        a{
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">老师你好</div>
+        <div class="subtitle">专业教学工具集</div>
+    </header>
+    
+    <div class="container">
+        <div class="intro">
+            <h2>简单高效的教学辅助工具</h2>
+            <p>精心设计的网页工具，帮助老师改善课堂体验，提高教学效率，让每一堂课都充满乐趣与活力。</p>
+        </div>
+        
+        <div class="tools-grid">
+            <a href="001_random_name_card/index.html" class="tool-card">
+                <div class="tool-icon random-card">
+                    <span>📇</span>
+                </div>
+                <div class="tool-info">
+                    <h3>课堂随机点名工具</h3>
+                    <p>轻松实现课堂随机点名，公平高效地调动学生课堂积极性，增强课堂互动。</p>
+                    <div class="btn">立即使用</div>
+                </div>
+            </a>
+            
+            <a href="002_random_name_cloud/word-cloud-picker.html" class="tool-card">
+                <div class="tool-icon word-cloud">
+                    <span>☁️</span>
+                </div>
+                <div class="tool-info">
+                    <h3>3D球形词云点名器</h3>
+                    <p>创新的3D球形词云随机点名工具，视觉效果震撼，为课堂带来全新互动体验。</p>
+                    <div class="btn">立即使用</div>
+                </div>
+            </a>
+            
+            <a href="003_timer/index.html" class="tool-card">
+                <div class="tool-icon timer">
+                    <span>⏱️</span>
+                </div>
+                <div class="tool-info">
+                    <h3>网页计时器</h3>
+                    <p>功能强大的网页计时器，支持正计时和倒计时，配有语音控制功能，课堂时间管理得心应手。</p>
+                    <div class="btn">立即使用</div>
+                </div>
+            </a>
+            
+            <a href="004_word_card/" class="tool-card">
+                <div class="tool-icon word-card">
+                    <span>🔤</span>
+                </div>
+                <div class="tool-info">
+                    <h3>单词卡片学习工具</h3>
+                    <p>交互式单词卡片学习工具，支持导入导出功能，帮助学生高效记忆单词，提升学习效果。</p>
+                    <div class="btn">立即使用</div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>© 2023-2024 老师你好 | laoshinihao.com | 教育教学辅助工具集</p>
+    </footer>
+</body>
 </html>

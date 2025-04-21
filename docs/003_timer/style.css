@@ -1,0 +1,573 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --bg-color: #1a1a2e;
+    --card-bg: #16213e;
+    --timer-color: #00b4d8;
+    --timer-shadow: #4cc9f0;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #ffffff;
+    transition: background-color 0.5s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 粒子背景 */
+#particles-js {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+.container {
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 30px;
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+}
+
+.container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+h1 {
+    margin-bottom: 25px;
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    letter-spacing: 1px;
+}
+
+/* 语音控制样式 */
+.voice-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 15px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.voice-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.network-status {
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#networkStatusText.online {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+#networkStatusText.offline {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+#voiceIndicator {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #ccc;
+    transition: all 0.3s ease;
+}
+
+#voiceIndicator.active {
+    background-color: var(--success-color);
+    box-shadow: 0 0 15px var(--success-color);
+    animation: pulse 1.5s infinite;
+}
+
+#voiceIndicator.error {
+    background-color: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+.permission-note {
+    margin-top: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8em;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#toggleVoiceBtn {
+    background-color: var(--secondary-color);
+    color: white;
+    margin-top: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+#toggleVoiceBtn:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+}
+
+/* 时钟背景样式 */
+.timer-wrapper {
+    position: relative;
+    margin: 30px 0;
+}
+
+.timer-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.clock-face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.clock-center {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: var(--timer-color);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px var(--timer-shadow);
+}
+
+.clock-hand {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.3);
+    top: 50%;
+    left: 50%;
+    transform-origin: left center;
+}
+
+.hour-hand {
+    width: 60px;
+    height: 4px;
+    border-radius: 4px;
+    transform: translateY(-50%);
+}
+
+.minute-hand {
+    width: 80px;
+    height: 3px;
+    border-radius: 3px;
+    transform: translateY(-50%);
+}
+
+.second-hand {
+    width: 90px;
+    height: 2px;
+    background-color: var(--accent-color);
+    border-radius: 2px;
+    transform: translateY(-50%);
+}
+
+/* 计时器显示样式 */
+.timer-display {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--timer-color);
+    text-shadow: 0 0 10px var(--timer-shadow);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    z-index: 1;
+}
+
+.timer-display::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    animation: shinyEffect 8s linear infinite;
+}
+
+@keyframes shinyEffect {
+    0% {
+        transform: rotate(30deg) translate(-100%, -100%);
+    }
+    100% {
+        transform: rotate(30deg) translate(100%, 100%);
+    }
+}
+
+/* 当计时器在运行时添加脉动效果 */
+.timer-display.running {
+    animation: timerPulse 2s infinite alternate;
+}
+
+@keyframes timerPulse {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 10px var(--timer-shadow);
+    }
+    100% {
+        transform: scale(1.03);
+        text-shadow: 0 0 20px var(--timer-shadow), 0 0 40px var(--timer-shadow);
+    }
+}
+
+/* 倒计时结束时的动画 */
+.timer-display.ending {
+    animation: ending 0.5s infinite alternate;
+}
+
+@keyframes ending {
+    0% {
+        color: var(--timer-color);
+        text-shadow: 0 0 10px var(--timer-shadow);
+    }
+    100% {
+        color: var(--accent-color);
+        text-shadow: 0 0 20px var(--accent-color), 0 0 40px var(--accent-color);
+    }
+}
+
+.timer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.timer-type {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 15px;
+}
+
+.timer-type label {
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.timer-type label:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.timer-type input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    position: relative;
+    transition: all 0.2s;
+}
+
+.timer-type input[type="radio"]:checked {
+    border-color: var(--secondary-color);
+}
+
+.timer-type input[type="radio"]:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--secondary-color);
+}
+
+.countdown-input {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 15px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+input[type="number"] {
+    width: 60px;
+    padding: 8px;
+    border: none;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    text-align: center;
+    font-size: 16px;
+    color: white;
+    transition: all 0.3s;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.5);
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    transition: all 0.3s;
+    opacity: 0;
+}
+
+button:hover::after {
+    opacity: 1;
+    animation: buttonShine 1s forwards;
+}
+
+@keyframes buttonShine {
+    0% {
+        transform: rotate(30deg) translate(-100%, -100%);
+    }
+    100% {
+        transform: rotate(30deg) translate(100%, 100%);
+    }
+}
+
+#startBtn {
+    background-color: var(--success-color);
+    color: white;
+}
+
+#startBtn:hover {
+    background-color: #219653;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
+}
+
+#pauseBtn {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+#pauseBtn:hover {
+    background-color: #e67e22;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(243, 156, 18, 0.4);
+}
+
+#resetBtn {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+#resetBtn:hover {
+    background-color: #c0392b;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+}
+
+button:hover {
+    opacity: 1;
+}
+
+button:disabled {
+    background-color: #7f8c8d;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+button:disabled::after {
+    display: none;
+}
+
+/* 默认隐藏倒计时输入框 */
+#countdownInputs {
+    display: none;
+}
+
+.voice-commands {
+    margin-top: 30px;
+    text-align: left;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.voice-commands h3 {
+    margin-bottom: 15px;
+    color: #ffffff;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.voice-commands ul {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 10px;
+}
+
+.voice-commands li {
+    font-size: 14px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid var(--secondary-color);
+    transition: all 0.3s;
+}
+
+.voice-commands li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(3px);
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .timer-display {
+        font-size: 3.5rem;
+        padding: 15px;
+    }
+    
+    .voice-commands ul {
+        grid-template-columns: 1fr;
+    }
+    
+    .buttons {
+        flex-wrap: wrap;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+} 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页计时器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="container">
+        <h1>网页计时器</h1>
+        <div class="voice-control">
+            <div class="voice-status" id="voiceStatus">
+                <span id="voiceIndicator"></span>
+                <span id="voiceText">语音控制已准备就绪</span>
+            </div>
+            <div class="network-status" id="networkStatus">
+                <small>网络状态: <span id="networkStatusText">正在检测...</span></small>
+            </div>
+            <button id="toggleVoiceBtn">启用语音控制</button>
+            <div class="permission-note">
+                <small>注意：首次使用时需要允许浏览器麦克风权限</small>
+                <small>语音控制需要稳定的网络连接才能正常工作</small>
+            </div>
+        </div>
+        <div class="timer-wrapper">
+            <div class="timer-bg">
+                <div class="clock-face"></div>
+                <div class="clock-center"></div>
+                <div class="clock-hand hour-hand"></div>
+                <div class="clock-hand minute-hand"></div>
+                <div class="clock-hand second-hand"></div>
+            </div>
+            <div class="timer-display">
+                <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+            </div>
+        </div>
+        <div class="timer-controls">
+            <div class="timer-type">
+                <label>
+                    <input type="radio" name="timer-type" id="countUp" checked> 正计时
+                </label>
+                <label>
+                    <input type="radio" name="timer-type" id="countDown"> 倒计时
+                </label>
+            </div>
+            <div class="countdown-input" id="countdownInputs">
+                <div class="input-group">
+                    <label for="setHours">时:</label>
+                    <input type="number" id="setHours" min="0" max="99" value="0">
+                </div>
+                <div class="input-group">
+                    <label for="setMinutes">分:</label>
+                    <input type="number" id="setMinutes" min="0" max="59" value="0">
+                </div>
+                <div class="input-group">
+                    <label for="setSeconds">秒:</label>
+                    <input type="number" id="setSeconds" min="0" max="59" value="0">
+                </div>
+            </div>
+            <div class="buttons">
+                <button id="startBtn">开始</button>
+                <button id="pauseBtn" disabled>暂停</button>
+                <button id="resetBtn">重置</button>
+            </div>
+        </div>
+        <div class="voice-commands">
+            <h3>语音指令说明</h3>
+            <ul>
+                <li>"开始" - 开始计时</li>
+                <li>"暂停" - 暂停计时</li>
+                <li>"继续" - 继续计时</li>
+                <li>"重置" - 重置计时器</li>
+                <li>"正计时" - 切换到正计时模式</li>
+                <li>"倒计时" - 切换到倒计时模式</li>
+                <li>"设置时间 X分钟" - 设置倒计时分钟</li>
+                <li>"设置时间 X小时Y分钟Z秒" - 设置倒计时时间</li>
+            </ul>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
