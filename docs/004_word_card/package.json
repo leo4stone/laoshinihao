@@ -1,17 +1,24 @@
 {
-  "name": "flashcard-app",
-  "version": "0.1.0",
-  "private": true,
+  "name": "word-card-app",
+  "version": "1.0.0",
+  "description": "单词卡片应用",
+  "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "setup": "node setup.js",
+    "dev": "npm run setup && vite",
+    "build": "npm run setup && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "next": "^13.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.8.0",
-    "framer-motion": "^10.12.4"
+    "papaparse": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
   }
 } 

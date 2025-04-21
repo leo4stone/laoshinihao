@@ -1,0 +1,74 @@
+.word-list {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  width: 100%;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.word-list h3 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
+}
+
+.word-item {
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background-color: var(--background-color);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.word-item:hover {
+  background-color: var(--highlight-color);
+  transform: translateX(3px);
+}
+
+.word-item.active {
+  background-color: var(--highlight-color);
+  border-left: 3px solid var(--primary-color);
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.word-text {
+  font-size: 1rem;
+}
+
+.current-indicator {
+  color: var(--accent-color);
+} 
