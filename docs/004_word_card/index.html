@@ -62,12 +62,18 @@
                 <div v-else class="flashcard-container">
                     <div class="flashcard" :class="{ flipped: cardFlipped }" @click="flipCard">
                         <div class="card-front">
-                            <div class="card-word">{{ currentCard.word }}</div>
+                            <div class="card-word" @click.stop="speakWord(currentCard.word, $event)">
+                                {{ currentCard.word }}
+                                <span class="sound-icon">🔊</span>
+                            </div>
                             <div class="flip-hint">点击查看答案</div>
                         </div>
                         <div class="card-back">
                             <div class="card-translation">{{ currentCard.translation }}</div>
-                            <div class="card-example">{{ currentCard.example }}</div>
+                            <div class="card-example" @click.stop="speakWord(currentCard.example, $event)">
+                                {{ currentCard.example }}
+                                <span class="sound-icon">🔊</span>
+                            </div>
                             <div class="flip-hint">点击隐藏答案</div>
                         </div>
                     </div>

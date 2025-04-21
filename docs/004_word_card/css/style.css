@@ -326,6 +326,8 @@ button {
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
+    position: relative;
+    cursor: pointer;
 }
 
 .card-translation {
@@ -339,6 +341,21 @@ button {
     font-style: italic;
     text-align: center;
     margin-bottom: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.sound-icon {
+    font-size: 18px;
+    position: absolute;
+    margin-left: 8px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.card-word:hover .sound-icon,
+.card-example:hover .sound-icon {
+    opacity: 1;
 }
 
 .flip-hint {

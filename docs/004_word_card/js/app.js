@@ -373,10 +373,45 @@ new Vue({
             }
         },
         
+        // 朗读单词或句子
+        speakWord: function(text, event) {
+            // 阻止事件冒泡，防止触发卡片翻转
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            // 检查浏览器是否支持语音合成
+            if ('speechSynthesis' in window) {
+                // 取消之前正在进行的朗读
+                window.speechSynthesis.cancel();
+                
+                // 创建一个语音合成实例
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // 设置语音属性
+                utterance.lang = 'en-US'; // 设置为英语
+                utterance.rate = 0.9; // 语速稍慢
+                utterance.pitch = 1; // 正常音调
+                
+                // 开始朗读
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn('当前浏览器不支持语音合成API');
+            }
+        },
+        
         // 翻转卡片
         flipCard: function(event) {
-            // 如果事件来自卡片导航区域的点击，不进行翻转
-            if (event && (event.target.closest('.card-navigation') || event.target.closest('.study-options'))) {
+            // 如果事件来自卡片导航区域的点击或朗读按钮的点击，不进行翻转
+            if (event && (
+                event.target.closest('.card-navigation') || 
+                event.target.closest('.study-options') ||
+                event.target.closest('.sound-icon') ||
+                (event.target.classList && (
+                    event.target.classList.contains('card-word') ||
+                    event.target.classList.contains('card-example')
+                ))
+            )) {
                 return;
             }
             this.cardFlipped = !this.cardFlipped;
