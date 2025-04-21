@@ -1,13 +1,178 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>单词卡片应用</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>单词卡片应用</h1>
+            <div class="nav-tabs">
+                <button :class="{ active: currentView === 'teacher' }" @click="currentView = 'teacher'">教师模式</button>
+                <button :class="{ active: currentView === 'student' }" @click="currentView = 'student'">学生模式</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- 教师模式：添加单词 -->
+            <div v-if="currentView === 'teacher'" class="teacher-panel">
+                <h2>单词管理</h2>
+                <div class="button-group">
+                    <button @click="showAddWordModal" class="btn-primary">添加单词</button>
+                    <button @click="showAIPromptModal" class="btn-ai">去deepseek生成</button>
+                    <button @click="exportWords" class="btn-secondary" v-if="words.length > 0">导出单词</button>
+                </div>
+
+                <div class="word-list">
+                    <h3>单词列表</h3>
+                    <div v-if="words.length === 0" class="empty-message">
+                        还没有添加任何单词
+                    </div>
+                    <ul v-else>
+                        <li v-for="(word, index) in words" :key="index" class="word-item">
+                            <div class="word-content">
+                                <div class="word-header">
+                                    <span class="word-text">{{ word.word }}</span>
+                                    <span class="word-translation">{{ word.translation }}</span>
+                                </div>
+                                <div class="word-example">{{ word.example }}</div>
+                            </div>
+                            <div class="word-actions">
+                                <button @click="editWord(index)" class="btn-edit">编辑</button>
+                                <button @click="removeWord(index)" class="btn-delete">删除</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 学生模式：学习单词 -->
+            <div v-if="currentView === 'student'" class="student-panel">
+                <div v-if="words.length === 0" class="empty-message">
+                    目前没有可学习的单词
+                </div>
+                <div v-else class="flashcard-container">
+                    <div class="flashcard" :class="{ flipped: cardFlipped }">
+                        <div class="card-front">
+                            <div class="card-word">{{ currentCard.word }}</div>
+                            <button @click="flipCard" class="btn-flip">显示答案</button>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-translation">{{ currentCard.translation }}</div>
+                            <div class="card-example">{{ currentCard.example }}</div>
+                            <button @click="flipCard" class="btn-flip">隐藏答案</button>
+                        </div>
+                    </div>
+                    <div class="card-navigation">
+                        <button @click="prevCard" :disabled="currentCardIndex === 0">上一个</button>
+                        <span>{{ currentCardIndex + 1 }} / {{ words.length }}</span>
+                        <button @click="nextCard" :disabled="currentCardIndex === words.length - 1">下一个</button>
+                    </div>
+                    <div class="study-options">
+                        <button @click="shuffleCards" class="btn-secondary">随机排序</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>单词卡片应用 &copy; 2025</p>
+        </footer>
+
+        <!-- 添加/编辑单词弹窗 -->
+        <div class="modal" v-if="showWordForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>{{ currentEditIndex >= 0 ? '编辑单词' : '添加单词' }}</h3>
+                    <span class="close-button" @click="cancelWordEdit">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="word">单词</label>
+                        <input type="text" id="word" v-model.trim="newWord.word" placeholder="请输入单词">
+                    </div>
+                    <div class="form-group">
+                        <label for="translation">翻译</label>
+                        <input type="text" id="translation" v-model.trim="newWord.translation" placeholder="请输入中文翻译">
+                    </div>
+                    <div class="form-group">
+                        <label for="example">例句</label>
+                        <textarea id="example" v-model.trim="newWord.example" placeholder="请输入例句"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="addWord" class="btn-primary">{{ currentEditIndex >= 0 ? '更新' : '添加' }}</button>
+                    <button @click="cancelWordEdit" class="btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI提示词弹窗 -->
+        <div class="modal" v-if="showAIPrompt">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>AI生成单词提示</h3>
+                    <span class="close-button" @click="showAIPrompt = false">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="presetWords">预设单词</label>
+                        <p class="hint">每行输入一个单词。如果填写，AI将只处理这些单词；如果不填写，AI将生成20个常用单词。</p>
+                        <textarea id="presetWords" v-model="presetWords" placeholder="请输入您希望包含的单词，每行一个"></textarea>
+                        <button @click="updateAIPrompt" class="btn-update">更新提示词</button>
+                    </div>
+                    <p>复制下面的提示词发送给AI，然后将返回的JSON粘贴到导入窗口中：</p>
+                    <textarea v-model="aiPromptText" readonly @click="selectAndCopy"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button @click="copyPromptText" class="btn-primary">复制提示词</button>
+                    <button @click="showAIPrompt = false" class="btn-secondary">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 复制成功弹窗 -->
+        <div class="modal" v-if="showCopySuccess">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>提示</h3>
+                    <span class="close-button" @click="showCopySuccess = false">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="success-message">提示词已复制</div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="showCopySuccess = false; showAIPrompt = true;" class="btn-secondary">返回修改提示词</button>
+                    <button @click="goToDeepseek()" class="btn-deepseek">跳转到deepseek</button>
+                    <button @click="showCopySuccess = false; showImportModal();" class="btn-primary">导入JSON</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导入JSON弹窗 -->
+        <div class="modal" v-if="showImport">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>导入单词JSON</h3>
+                    <span class="close-button" @click="showImport = false">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>请粘贴单词JSON数据：</p>
+                    <textarea v-model="importJsonText" placeholder="粘贴JSON数据到这里..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button @click="importWords" class="btn-primary">导入</button>
+                    <button @click="showImport = false" class="btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
 </html> 
