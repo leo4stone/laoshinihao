@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- 引入Vue.js -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- 引入QRCode.js -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -26,6 +28,7 @@
                     <button @click="showAddWordModal" class="btn-primary">添加单词</button>
                     <button @click="showAIPromptModal" class="btn-ai">去deepseek生成</button>
                     <button @click="exportWords" class="btn-secondary" v-if="words.length > 0">导出单词</button>
+                    <button @click="showQRCodeModal" class="btn-qrcode" v-if="words.length > 0">生成分享二维码</button>
                 </div>
 
                 <div class="word-list">
@@ -57,24 +60,24 @@
                     目前没有可学习的单词
                 </div>
                 <div v-else class="flashcard-container">
-                    <div class="flashcard" :class="{ flipped: cardFlipped }">
+                    <div class="flashcard" :class="{ flipped: cardFlipped }" @click="flipCard">
                         <div class="card-front">
                             <div class="card-word">{{ currentCard.word }}</div>
-                            <button @click="flipCard" class="btn-flip">显示答案</button>
+                            <div class="flip-hint">点击查看答案</div>
                         </div>
                         <div class="card-back">
                             <div class="card-translation">{{ currentCard.translation }}</div>
                             <div class="card-example">{{ currentCard.example }}</div>
-                            <button @click="flipCard" class="btn-flip">隐藏答案</button>
+                            <div class="flip-hint">点击隐藏答案</div>
                         </div>
                     </div>
                     <div class="card-navigation">
-                        <button @click="prevCard" :disabled="currentCardIndex === 0">上一个</button>
+                        <button @click="prevCard($event)" :disabled="currentCardIndex === 0">上一个</button>
                         <span>{{ currentCardIndex + 1 }} / {{ words.length }}</span>
-                        <button @click="nextCard" :disabled="currentCardIndex === words.length - 1">下一个</button>
+                        <button @click="nextCard($event)" :disabled="currentCardIndex === words.length - 1">下一个</button>
                     </div>
                     <div class="study-options">
-                        <button @click="shuffleCards" class="btn-secondary">随机排序</button>
+                        <button @click="shuffleCards($event)" class="btn-secondary">随机排序</button>
                     </div>
                 </div>
             </div>
@@ -168,6 +171,54 @@
                 <div class="modal-footer">
                     <button @click="importWords" class="btn-primary">导入</button>
                     <button @click="showImport = false" class="btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 二维码分享弹窗 -->
+        <div class="modal" v-if="showQRCode">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>分享单词列表</h3>
+                    <span class="close-button" @click="showQRCode = false">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="share-tabs">
+                        <button :class="{ active: shareTab === 'qrcode' }" @click="shareTab = 'qrcode'">二维码分享</button>
+                        <button :class="{ active: shareTab === 'url' }" @click="shareTab = 'url'">链接分享</button>
+                    </div>
+                    
+                    <!-- 二维码分享内容 -->
+                    <div v-if="shareTab === 'qrcode'" class="share-content">
+                        <p>扫描下方二维码即可获取当前单词列表：</p>
+                        <div class="qrcode-container" v-if="!qrcodeError">
+                            <div id="qrcode"></div>
+                        </div>
+                        <div v-if="qrcodeError" class="error-message">
+                            <p>数据量过大，无法生成二维码。请使用链接分享。</p>
+                        </div>
+                        <div class="qrcode-info">
+                            <p>共 {{ words.length }} 个单词</p>
+                            <p class="hint">学生扫描后可直接导入单词</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 链接分享内容 -->
+                    <div v-if="shareTab === 'url'" class="share-content">
+                        <p>复制以下链接分享给学生：</p>
+                        <div class="url-container">
+                            <input type="text" v-model="shareUrl" readonly @click="selectAndCopyUrl" class="share-url-input">
+                            <button @click="copyShareUrl" class="btn-copy-url">复制链接</button>
+                        </div>
+                        <div class="copy-url-success" v-if="urlCopied">链接已复制！</div>
+                        <div class="qrcode-info">
+                            <p>共 {{ words.length }} 个单词</p>
+                            <p class="hint">学生打开链接后可直接导入单词</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="showQRCode = false" class="btn-secondary">关闭</button>
                 </div>
             </div>
         </div>

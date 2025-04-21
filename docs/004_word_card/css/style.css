@@ -191,6 +191,15 @@ button {
     background-color: #455a64;
 }
 
+.btn-qrcode {
+    background-color: #ff9800;
+    color: white;
+}
+
+.btn-qrcode:hover {
+    background-color: #f57c00;
+}
+
 /* 单词列表样式 */
 .word-list {
     margin-top: 40px;
@@ -270,6 +279,8 @@ button {
     height: 300px;
     perspective: 1000px;
     margin-bottom: 30px;
+    cursor: pointer;
+    position: relative;
 }
 
 .flashcard.flipped .card-front {
@@ -283,6 +294,8 @@ button {
 .card-front,
 .card-back {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
@@ -326,6 +339,15 @@ button {
     font-style: italic;
     text-align: center;
     margin-bottom: 20px;
+}
+
+.flip-hint {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
 }
 
 .card-navigation {
@@ -454,4 +476,104 @@ footer {
     text-align: center;
     padding: 20px;
     font-weight: bold;
+}
+
+/* 二维码样式 */
+.qrcode-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#qrcode {
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qrcode-info {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.qrcode-info p {
+    margin: 5px 0;
+}
+
+/* 分享选项卡样式 */
+.share-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.share-tabs button {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.share-tabs button:hover {
+    color: #42b983;
+}
+
+.share-tabs button.active {
+    color: #42b983;
+    border-bottom: 2px solid #42b983;
+}
+
+.share-content {
+    padding: 10px 0;
+}
+
+.url-container {
+    display: flex;
+    margin: 15px 0;
+}
+
+.share-url-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-copy-url {
+    background-color: #42b983;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-copy-url:hover {
+    background-color: #3aa876;
+}
+
+.copy-url-success {
+    color: #27ae60;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #e53935;
+    padding: 15px;
+    border-radius: 4px;
+    margin: 15px 0;
+    text-align: center;
 } 

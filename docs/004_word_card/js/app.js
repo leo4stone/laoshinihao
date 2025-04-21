@@ -22,6 +22,7 @@ new Vue({
         showAIPrompt: false,
         showImport: false,
         showCopySuccess: false,
+        showQRCode: false,
         // AI提示词文本
         aiPromptText: '',
         // 预设单词
@@ -29,7 +30,14 @@ new Vue({
         // 导入JSON文本
         importJsonText: '',
         // 复制成功提示
-        copySuccess: false
+        copySuccess: false,
+        // 二维码对象
+        qrcode: null,
+        // 分享设置
+        shareTab: 'qrcode',
+        shareUrl: '',
+        urlCopied: false,
+        qrcodeError: false
     },
     computed: {
         // 当前显示的单词卡
@@ -50,6 +58,116 @@ new Vue({
             this.showWordForm = false;
             this.resetForm();
             this.currentEditIndex = -1;
+        },
+        
+        // 显示二维码弹窗
+        showQRCodeModal: function() {
+            this.showQRCode = true;
+            this.shareTab = 'qrcode';
+            this.urlCopied = false;
+            this.qrcodeError = false;
+            
+            // 首先生成分享URL
+            this.generateShareUrl();
+            
+            // 在下一个DOM更新周期生成二维码
+            this.$nextTick(() => {
+                this.generateQRCode();
+            });
+        },
+        
+        // 生成分享URL
+        generateShareUrl: function() {
+            // 获取当前页面URL（不含参数）
+            const url = window.location.href.split('?')[0];
+            
+            // 将单词列表转换为JSON字符串并进行编码
+            const wordsJson = JSON.stringify(this.words);
+            const encodedData = encodeURIComponent(wordsJson);
+            
+            // 创建包含数据的URL
+            this.shareUrl = `${url}?data=${encodedData}`;
+        },
+        
+        // 生成分享二维码
+        generateQRCode: function() {
+            // 清除旧的二维码
+            if (this.qrcode) {
+                document.getElementById('qrcode').innerHTML = '';
+            }
+            
+            try {
+                // 如果URL过长，可能无法生成二维码
+                if (this.shareUrl.length > 2000) {
+                    console.warn('URL过长，二维码可能无法正确扫描');
+                }
+                
+                // 生成二维码
+                this.qrcode = new QRCode(document.getElementById('qrcode'), {
+                    text: this.shareUrl,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+                
+                this.qrcodeError = false;
+            } catch (error) {
+                console.error('生成二维码失败', error);
+                this.qrcodeError = true;
+                this.shareTab = 'url'; // 自动切换到URL分享
+            }
+        },
+        
+        // 复制分享URL
+        copyShareUrl: function() {
+            navigator.clipboard.writeText(this.shareUrl).then(() => {
+                this.urlCopied = true;
+                setTimeout(() => {
+                    this.urlCopied = false;
+                }, 3000);
+            }).catch(err => {
+                console.error('复制URL失败: ', err);
+                alert('复制失败，请手动复制');
+            });
+        },
+        
+        // 选择并复制URL
+        selectAndCopyUrl: function(event) {
+            event.target.select();
+        },
+        
+        // 从URL参数中导入单词数据
+        importFromUrl: function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const data = urlParams.get('data');
+            
+            if (data) {
+                try {
+                    // 解码并解析JSON数据
+                    const decodedData = decodeURIComponent(data);
+                    const importedWords = JSON.parse(decodedData);
+                    
+                    if (Array.isArray(importedWords) && importedWords.length > 0) {
+                        // 如果数据有效，导入单词
+                        this.words = importedWords;
+                        this.saveToLocalStorage();
+                        
+                        // 提示导入成功
+                        alert(`成功导入${importedWords.length}个单词！`);
+                        
+                        // 切换到学生模式
+                        this.currentView = 'student';
+                        
+                        // 去掉URL中的参数，防止刷新页面重复导入
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                } catch (error) {
+                    console.error('从URL导入数据失败', error);
+                    alert('导入失败：无效的数据格式');
+                }
+            }
         },
         
         // 显示AI提示词弹窗
@@ -256,12 +374,21 @@ new Vue({
         },
         
         // 翻转卡片
-        flipCard: function() {
+        flipCard: function(event) {
+            // 如果事件来自卡片导航区域的点击，不进行翻转
+            if (event && (event.target.closest('.card-navigation') || event.target.closest('.study-options'))) {
+                return;
+            }
             this.cardFlipped = !this.cardFlipped;
         },
         
         // 下一张卡片
-        nextCard: function() {
+        nextCard: function(event) {
+            // 阻止事件冒泡，防止触发卡片翻转
+            if (event) {
+                event.stopPropagation();
+            }
+            
             if (this.currentCardIndex < this.words.length - 1) {
                 this.currentCardIndex++;
                 this.cardFlipped = false;
@@ -269,7 +396,12 @@ new Vue({
         },
         
         // 上一张卡片
-        prevCard: function() {
+        prevCard: function(event) {
+            // 阻止事件冒泡，防止触发卡片翻转
+            if (event) {
+                event.stopPropagation();
+            }
+            
             if (this.currentCardIndex > 0) {
                 this.currentCardIndex--;
                 this.cardFlipped = false;
@@ -277,7 +409,12 @@ new Vue({
         },
         
         // 随机排序卡片
-        shuffleCards: function() {
+        shuffleCards: function(event) {
+            // 阻止事件冒泡，防止触发卡片翻转
+            if (event) {
+                event.stopPropagation();
+            }
+            
             // 使用Fisher-Yates洗牌算法
             for (let i = this.words.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -307,6 +444,10 @@ new Vue({
     },
     // 生命周期钩子：在创建后从本地存储加载数据
     created: function() {
+        // 先从本地存储加载数据
         this.loadFromLocalStorage();
+        
+        // 检查URL参数，如果有数据则导入
+        this.importFromUrl();
     }
 }); 
