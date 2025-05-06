@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会议实时字幕</title>
+    <!-- 引入RecordRTC库 -->
+    <script src="https://cdn.jsdelivr.net/npm/recordrtc@5.6.2/RecordRTC.min.js"></script>
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .meeting-container {
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #1e88e5;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            color: #666;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .status-waiting {
+            background-color: #ff9800;
+        }
+        .status-active {
+            background-color: #4caf50;
+            animation: pulse 1.5s infinite;
+        }
+        .status-inactive {
+            background-color: #f44336;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        button {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1565c0;
+        }
+        button:disabled {
+            background-color: #bbdefb;
+            cursor: not-allowed;
+        }
+        .subtitle-container {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .subtitle-header {
+            background-color: #1e88e5;
+            color: white;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        .subtitle-content {
+            flex: 1;
+            padding: 20px;
+            font-size: 22px;
+            line-height: 1.6;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .paragraph {
+            margin-bottom: 25px;
+            padding: 10px;
+            border-radius: 8px;
+            /* background-color: #f8f9fa; */
+        }
+        .sentence {
+            margin-bottom: 10px;
+            padding: 5px 0;
+            transition: opacity 0.3s;
+        }
+        .paragraph .sentence {
+            display: inline;
+            margin-right: 5px;
+        }
+        .paragraph .sentence:not(:first-child) .sentence-time {
+            display: none;
+        }
+        .paragraph .sentence .sentence-end-time {
+            display: none;
+        }
+        .sentence-time {
+            color: #757575;
+            font-size: 16px;
+            margin-right: 8px;
+            font-weight: normal;
+        }
+        .sentence-end-time {
+            color: #757575;
+            font-size: 16px;
+            margin-left: 8px;
+            font-weight: normal;
+        }
+        .current-sentence {
+            font-weight: bold;
+            color: #1e88e5;
+        }
+        .previous-sentence {
+            color: #666;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="meeting-container">
+        <div class="header">
+            <h1>课堂实录</h1>
+            <div class="controls">
+                <div class="status">
+                    <span class="status-indicator status-inactive" id="statusIndicator"></span>
+                    <span id="statusText">未开始</span>
+                </div>
+                <button id="startBtn">开始</button>
+                <button id="stopBtn" disabled>停止</button>
+            </div>
+        </div>
+        
+        <div class="subtitle-container">
+            <div class="subtitle-header">实时字幕</div>
+            <div class="subtitle-content" id="subtitleContent"></div>
+        </div>
+        
+        <div class="footer">
+            使用字节跳动实时语音识别服务 | 点击"开始"按钮开始录音和识别
+        </div>
+    </div>
+
+    <script>
+        // DOM 元素
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const subtitleContent = document.getElementById('subtitleContent');
+        
+        // 全局变量
+        let websocket = null;
+        let mediaStream = null;
+        let recorder = null;
+        let isRecording = false;
+        let lastParagraphEndTime = null;
+        let currentParagraph = null;
+        
+        // 从URL获取参数
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // 格式化时间为 HH:MM:SS 格式
+        function formatTime(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // API凭据（优先从URL获取，否则使用默认值）
+        // 
+        const API_CONFIG = {
+            appKey: getUrlParam('appKey') || '123',
+            accessKey: getUrlParam('accessKey') || 'abc',
+            resourceId: getUrlParam('resourceId') || 'volc.bigasr.sauc.duration'
+        };
+        
+        // 更新状态UI
+        function updateStatus(status) {
+            statusText.textContent = status;
+            
+            if (status === '识别中') {
+                statusIndicator.className = 'status-indicator status-active';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                isRecording = true;
+            } else if (status === '准备中') {
+                statusIndicator.className = 'status-indicator status-waiting';
+                startBtn.disabled = true;
+                stopBtn.disabled = true;
+            } else {
+                statusIndicator.className = 'status-indicator status-inactive';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                isRecording = false;
+            }
+        }
+        
+        // 解析时间字符串为Date对象
+        function parseTimeString(timeString) {
+            if (!timeString) return null;
+            
+            const [hours, minutes, seconds] = timeString.split(':').map(Number);
+            const now = new Date();
+            const result = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                hours,
+                minutes,
+                seconds
+            );
+            return result;
+        }
+        
+        // 检查两个时间是否在阈值内（小于5秒）
+        function isWithinTimeThreshold(time1, time2) {
+            if (!time1 || !time2) return false;
+            
+            const t1 = parseTimeString(time1);
+            const t2 = parseTimeString(time2);
+            if (!t1 || !t2) return false;
+            
+            const diffInSeconds = Math.abs((t2 - t1) / 1000);
+            return diffInSeconds < 2;
+        }
+        
+        // 创建新段落
+        function createNewParagraph() {
+            const paragraph = document.createElement('div');
+            paragraph.className = 'paragraph';
+            subtitleContent.appendChild(paragraph);
+            currentParagraph = paragraph;
+            return paragraph;
+        }
+        
+        // 添加或更新字幕
+        function updateSubtitle(text, isNew = false) {
+            if (isNew) {
+                console.log("isNew");
+                // 将现有的当前句子变为历史句子，并添加结束时间
+                const currentSentences = document.querySelectorAll('.current-sentence');
+                currentSentences.forEach(sentence => {
+                    sentence.classList.remove('current-sentence');
+                    sentence.classList.add('previous-sentence');
+                    
+                    // 添加结束时间
+                    const currentTime = new Date();
+                    const endTimeStr = formatTime(currentTime);
+                    const endTimeSpan = document.createElement('span');
+                    endTimeSpan.className = 'sentence-end-time';
+                    endTimeSpan.textContent = endTimeStr;
+                    sentence.appendChild(endTimeSpan);
+                    
+                    // 保存最后一句的结束时间，用于段落分组
+                    lastParagraphEndTime = endTimeStr;
+                });
+                
+                // 添加新的当前句子，不添加时间戳
+                const newSentence = document.createElement('div');
+                newSentence.className = 'sentence current-sentence';
+                newSentence.textContent = "";
+                
+                // 先不添加到段落，等到有内容时再决定
+                subtitleContent.appendChild(newSentence);
+            } else {
+                console.log("isNotNew");
+                // 更新当前句子
+                const currentSentence = document.querySelector('.current-sentence');
+                if (currentSentence) {
+                    // 检查是否已有时间戳
+                    const timeSpan = currentSentence.querySelector('.sentence-time');
+                    if (timeSpan) {
+                        // 已有时间戳，保留时间戳元素，只更新文本内容
+                        while (currentSentence.childNodes.length > 1) {
+                            // 如果有结束时间戳，也要保留
+                            const endTimeSpan = currentSentence.querySelector('.sentence-end-time');
+                            if (endTimeSpan) {
+                                currentSentence.removeChild(endTimeSpan);
+                            }
+                            
+                            if (currentSentence.lastChild !== timeSpan) {
+                                currentSentence.removeChild(currentSentence.lastChild);
+                            } else {
+                                break;
+                            }
+                        }
+                        // 添加新的文本内容
+                        currentSentence.appendChild(document.createTextNode(text));
+                        
+                        // 如果之前有结束时间戳，重新添加
+                        const savedEndTimeSpan = currentSentence.querySelector('.sentence-end-time');
+                        if (savedEndTimeSpan) {
+                            currentSentence.appendChild(savedEndTimeSpan);
+                        }
+                    } else {
+                        // 没有时间戳，添加一个
+                        const currentTime = new Date();
+                        const startTimeStr = formatTime(currentTime);
+                        const timeSpan = document.createElement('span');
+                        timeSpan.className = 'sentence-time';
+                        timeSpan.textContent = startTimeStr;
+                        
+                        currentSentence.textContent = "";
+                        currentSentence.appendChild(timeSpan);
+                        currentSentence.appendChild(document.createTextNode(text));
+                        
+                        // 确定段落归属
+                        // 如果当前句子不在任何段落中
+                        if (currentSentence.parentElement === subtitleContent) {
+                            // 判断时间差距
+                            if (lastParagraphEndTime && isWithinTimeThreshold(lastParagraphEndTime, startTimeStr)) {
+                                // 如果在阈值内（<5秒），添加到上一个段落
+                                const paragraphs = document.querySelectorAll('.paragraph');
+                                if (paragraphs.length > 0) {
+                                    const lastParagraph = paragraphs[paragraphs.length - 1];
+                                    subtitleContent.removeChild(currentSentence);
+                                    lastParagraph.appendChild(currentSentence);
+                                    currentParagraph = lastParagraph;
+                                } else {
+                                    // 没有段落，创建新段落
+                                    const newParagraph = createNewParagraph();
+                                    subtitleContent.removeChild(currentSentence);
+                                    newParagraph.appendChild(currentSentence);
+                                }
+                            } else {
+                                // 时间差距大，创建新段落
+                                const newParagraph = createNewParagraph();
+                                subtitleContent.removeChild(currentSentence);
+                                newParagraph.appendChild(currentSentence);
+                            }
+                        }
+                    }
+                } else {
+                    // 如果没有当前句子，创建一个
+                    const newSentence = document.createElement('div');
+                    newSentence.className = 'sentence current-sentence';
+                    
+                    // 创建时间戳元素
+                    const currentTime = new Date();
+                    const startTimeStr = formatTime(currentTime);
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'sentence-time';
+                    timeSpan.textContent = startTimeStr;
+                    
+                    newSentence.appendChild(timeSpan);
+                    newSentence.appendChild(document.createTextNode(text));
+                    
+                    // 决定段落归属
+                    if (lastParagraphEndTime && isWithinTimeThreshold(lastParagraphEndTime, startTimeStr)) {
+                        // 如果与上一段落的结束时间在阈值内，添加到上一个段落
+                        if (currentParagraph) {
+                            currentParagraph.appendChild(newSentence);
+                        } else {
+                            // 没有当前段落，创建新段落
+                            const newParagraph = createNewParagraph();
+                            newParagraph.appendChild(newSentence);
+                        }
+                    } else {
+                        // 创建新段落
+                        const newParagraph = createNewParagraph();
+                        newParagraph.appendChild(newSentence);
+                    }
+                }
+            }
+            
+            // 滚动到底部
+            subtitleContent.scrollTop = subtitleContent.scrollHeight;
+        }
+        
+        // WebSocket 二进制协议
+        function createHeaderView(messageType, messageFlags, serialization, compression) {
+            const headerView = new Uint8Array(4);
+            
+            // 第一个字节: 版本(4位) + Header大小(4位)
+            headerView[0] = (1 << 4) | 1; // 版本1 & header大小1(1x4=4字节)
+            
+            // 第二个字节: 消息类型(4位) + 消息特定标志(4位)
+            headerView[1] = (messageType << 4) | messageFlags;
+            
+            // 第三个字节: 序列化方法(4位) + 压缩方法(4位)
+            headerView[2] = (serialization << 4) | compression;
+            
+            // 第四个字节: 保留位
+            headerView[3] = 0;
+            
+            return headerView;
+        }
+
+        function createFullClientRequest() {
+            // Header创建: 消息类型为 0001(full client request), 标志为 0000, 序列化为 JSON(0001), 无压缩(0000)
+            const headerView = createHeaderView(1, 0, 1, 0);
+            
+            // 请求参数
+            const requestParams = {
+                user: {
+                    uid: "browser-" + Date.now(),
+                    platform: "Web"
+                },
+                audio: {
+                    format: "wav",
+                    rate: 16000,
+                    bits: 16,
+                    channel: 1
+                },
+                request: {
+                    model_name: "bigmodel",
+                    enable_itn: true,
+                    enable_punc: true,
+                    enable_ddc: true,  // 启用语义顺滑，让会议字幕更流畅
+                    result_type: "single"  // 使用增量结果返回，更适合实时字幕
+                }
+            };
+            
+            // 将请求参数转为JSON字符串并编码为UTF-8
+            const jsonPayload = JSON.stringify(requestParams);
+            const encodedPayload = new TextEncoder().encode(jsonPayload);
+            
+            // 创建一个大的ArrayBuffer来容纳header + 4字节的payload大小 + payload
+            const payloadSize = encodedPayload.length;
+            const totalSize = 4 + 4 + payloadSize;
+            const buffer = new ArrayBuffer(totalSize);
+            const view = new Uint8Array(buffer);
+            
+            // 复制header
+            view.set(headerView);
+            
+            // 设置payload大小(4字节，大端)
+            const payloadSizeView = new DataView(buffer, 4, 4);
+            payloadSizeView.setUint32(0, payloadSize, false); // false表示大端
+            
+            // 复制payload
+            view.set(encodedPayload, 8);
+            
+            return buffer;
+        }
+
+        function createAudioRequest(audioData, isLast) {
+            // 根据是否是最后一包设置标志
+            const flags = isLast ? 0x02 : 0x00;
+            
+            // Header创建: 消息类型为 0010(audio only request), 标志根据isLast, 序列化为 0000(无), 无压缩(0000)
+            const headerView = createHeaderView(2, flags, 0, 0);
+            
+            // 创建一个大的ArrayBuffer来容纳header + 4字节的payload大小 + payload
+            const payloadSize = audioData.byteLength;
+            const totalSize = 4 + 4 + payloadSize;
+            const buffer = new ArrayBuffer(totalSize);
+            const view = new Uint8Array(buffer);
+            
+            // 复制header
+            view.set(headerView);
+            
+            // 设置payload大小(4字节，大端)
+            const payloadSizeView = new DataView(buffer, 4, 4);
+            payloadSizeView.setUint32(0, payloadSize, false); // false表示大端
+            
+            // 复制payload
+            view.set(new Uint8Array(audioData), 8);
+            
+            return buffer;
+        }
+
+        // 解析服务器响应
+        function parseServerResponse(data) {
+            const buffer = data;
+            const headerView = new Uint8Array(buffer, 0, 4);
+            
+            const messageType = (headerView[1] >> 4) & 0x0F;
+            const messageFlags = headerView[1] & 0x0F;
+            const serializationMethod = (headerView[2] >> 4) & 0x0F;
+            
+            // 检查是否是错误消息
+            if (messageType === 0x0F) {
+                console.error("收到错误消息");
+                return { isError: true };
+            }
+            
+            // 确定offset
+            let offset = 4;
+            if (messageFlags & 0x01) {
+                offset += 4; // 跳过sequence字段
+            }
+            
+            const payloadSizeView = new DataView(buffer, offset, 4);
+            const payloadSize = payloadSizeView.getUint32(0, false); // 大端
+            offset += 4;
+            
+            const payloadBytes = new Uint8Array(buffer, offset, payloadSize);
+            let payload = null;
+            
+            if (serializationMethod === 0x01) { // JSON
+                const decodedPayload = new TextDecoder().decode(payloadBytes);
+                try {
+                    payload = JSON.parse(decodedPayload);
+                } catch (e) {
+                    console.error('解析响应JSON失败:', e);
+                    return { isError: true };
+                }
+            }
+            
+            const isLast = (messageFlags & 0x02) !== 0;
+            
+            return {
+                isError: false,
+                payload,
+                isLast
+            };
+        }
+
+        // 启动会议字幕
+        async function startMeetingSubtitle() {
+            try {
+                updateStatus('准备中');
+                
+                // 1. 建立WebSocket连接
+                const url = `wss://openspeech.bytedance.com/api/v3/sauc/bigmodel?api_app_key=${encodeURIComponent(API_CONFIG.appKey)}&api_access_key=${encodeURIComponent(API_CONFIG.accessKey)}&api_resource_id=${encodeURIComponent(API_CONFIG.resourceId)}`;
+                
+                websocket = new WebSocket(url);
+                websocket.binaryType = 'arraybuffer';
+                
+                websocket.onopen = function() {
+                    console.log('WebSocket连接已建立');
+                    
+                    // 发送Full Client Request
+                    const fullClientRequest = createFullClientRequest();
+                    websocket.send(fullClientRequest);
+                    
+                    // 开始录音
+                    startRecording();
+                };
+                
+                websocket.onmessage = function(event) {
+                    const response = parseServerResponse(event.data);
+                    
+                    if (response.isError) {
+                        console.error('接收到错误响应');
+                        return;
+                    }
+                    
+                    if (response.payload && response.payload.result) {
+                        // 获取识别结果
+                        const result = response.payload.result;
+                        
+                        if (result.text) {
+                            // 确定是否需要新建一个句子
+                            let isNewSentence = false;
+                            if (result.utterances && result.utterances.length > 0) {
+                                // 如果有新的definite句子，将其作为新句子
+                                for (const utterance of result.utterances) {
+                                    if (utterance.definite) {
+                                        isNewSentence = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            updateSubtitle(result.text, isNewSentence);
+                        }
+                    }
+                };
+                
+                websocket.onclose = function() {
+                    console.log('WebSocket连接已关闭');
+                    stopMeetingSubtitle();
+                };
+                
+                websocket.onerror = function(error) {
+                    console.error('WebSocket错误:', error);
+                    updateStatus('连接错误');
+                };
+                
+            } catch (error) {
+                console.error('启动会议字幕错误:', error);
+                updateStatus('启动失败');
+            }
+        }
+        
+        // 启动录音
+        async function startRecording() {
+            try {
+                // 获取媒体流
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // 创建RecordRTC实例，使用StereoAudioRecorder
+                recorder = new RecordRTC(mediaStream, {
+                    type: 'audio',
+                    mimeType: 'audio/wav',
+                    recorderType: StereoAudioRecorder,
+                    numberOfAudioChannels: 1,
+                    desiredSampRate: 16000,
+                    timeSlice: 200, // 每200ms触发一次ondataavailable
+                    ondataavailable: function(blob) {
+                        // 将音频数据发送到服务器
+                        if (websocket && websocket.readyState === WebSocket.OPEN && isRecording) {
+                            // 将Blob转换为ArrayBuffer
+                            const fileReader = new FileReader();
+                            fileReader.onload = function() {
+                                const audioData = this.result;
+                                const audioRequest = createAudioRequest(audioData, false);
+                                websocket.send(audioRequest);
+                            };
+                            fileReader.readAsArrayBuffer(blob);
+                        }
+                    }
+                });
+                
+                // 开始录音
+                recorder.startRecording();
+                updateStatus('识别中');
+                
+            } catch (error) {
+                console.error('录音错误:', error);
+                updateStatus('录音失败');
+            }
+        }
+
+        // 停止会议字幕
+        function stopMeetingSubtitle() {
+            // 停止录音
+            if (recorder) {
+                recorder.stopRecording(() => {
+                    // 发送最后一个音频包（空包，标记为最后一包）
+                    if (websocket && websocket.readyState === WebSocket.OPEN) {
+                        const buffer = createAudioRequest(new ArrayBuffer(0), true);
+                        websocket.send(buffer);
+                    }
+                    
+                    // 关闭WebSocket连接
+                    if (websocket) {
+                        websocket.close();
+                        websocket = null;
+                    }
+                    
+                    // 释放媒体资源
+                    if (mediaStream) {
+                        mediaStream.getTracks().forEach(track => track.stop());
+                        mediaStream = null;
+                    }
+                    
+                    recorder = null;
+                });
+            }
+            
+            updateStatus('未开始');
+        }
+
+        // 绑定按钮事件
+        startBtn.addEventListener('click', startMeetingSubtitle);
+        stopBtn.addEventListener('click', stopMeetingSubtitle);
+    </script>
+</body>
+</html> 
