@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生点名工具</title>
+    
+    <!-- 引入LESS样式文件 -->
+    <link rel="stylesheet/less" type="text/css" href="./src/styles/sl-checkstudents.less">
+    
+    <!-- 引入Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- 引入Less.js用于浏览器端编译 -->
+    <script src="https://cdn.jsdelivr.net/npm/less@4.1.3/dist/less.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <check-students></check-students>
+    </div>
+
+    <!-- 引入组件脚本 -->
+    <script type="module">
+        import CheckStudents from './src/components/checkstudents/sl-checkstudents-vue.js';
+        
+        const { createApp } = Vue;
+        
+        createApp({
+            components: {
+                CheckStudents
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html> 

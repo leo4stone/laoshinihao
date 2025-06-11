@@ -1,0 +1,342 @@
+// 变量定义
+@primary-color: #3498db;
+@success-color: #27ae60;
+@danger-color: #e74c3c;
+@warning-color: #f39c12;
+@gray-light: #ecf0f1;
+@gray-medium: #bdc3c7;
+@gray-dark: #34495e;
+@white: #ffffff;
+@shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+@border-radius: 8px;
+@font-size-base: 14px;
+@font-size-large: 16px;
+@font-size-xl: 18px;
+@font-size-xxl: 24px;
+
+// 主容器
+.sl-checkstudents {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    
+    // 顶部班级信息
+    .sl-checkstudents-header {
+        background: @white;
+        border-radius: @border-radius;
+        box-shadow: @shadow;
+        padding: 20px 30px;
+        margin-bottom: 20px;
+        
+        .sl-checkstudents-class-info {
+            text-align: center;
+            
+            .sl-checkstudents-class-title {
+                color: @gray-dark;
+                font-size: @font-size-xxl;
+                font-weight: 600;
+                margin: 0 0 15px 0;
+            }
+            
+            .sl-checkstudents-info-row {
+                display: block;
+                
+                .sl-checkstudents-teacher,
+                .sl-checkstudents-time {
+                    display: inline-block;
+                    color: @gray-medium;
+                    font-size: @font-size-large;
+                    margin: 0 20px;
+                }
+            }
+        }
+    }
+    
+    // 内容区域
+    .sl-checkstudents-content {
+        position: relative;
+        background: @white;
+        border-radius: @border-radius;
+        box-shadow: @shadow;
+        padding: 30px;
+        margin-bottom: 20px;
+        min-height: 400px;
+        
+        // 学生网格容器
+        .sl-checkstudents-student-grid {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 30px;
+            
+            .sl-checkstudents-student-row {
+                display: block;
+                margin-bottom: 20px;
+                
+                &:last-child {
+                    margin-bottom: 0;
+                }
+                
+                .sl-checkstudents-student-cell {
+                    display: inline-block;
+                    width: 140px;
+                    margin: 0 15px;
+                    vertical-align: top;
+                    
+                    .sl-checkstudents-student-card {
+                        background: @gray-light;
+                        border: 2px solid @gray-medium;
+                        border-radius: @border-radius;
+                        padding: 15px 10px;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                        cursor: default;
+                        
+                        .sl-checkstudents-student-avatar {
+                            font-size: 32px;
+                            margin-bottom: 8px;
+                        }
+                        
+                        .sl-checkstudents-student-name {
+                            font-size: @font-size-base;
+                            font-weight: 500;
+                            color: @gray-dark;
+                            margin-bottom: 6px;
+                        }
+                        
+                        .sl-checkstudents-student-status {
+                            font-size: 12px;
+                            padding: 3px 8px;
+                            border-radius: 12px;
+                            font-weight: 500;
+                        }
+                        
+                        // 缺勤状态
+                        &.absent {
+                            background: #ffebee;
+                            border-color: @danger-color;
+                            
+                            .sl-checkstudents-student-status {
+                                background: @danger-color;
+                                color: @white;
+                            }
+                        }
+                        
+                        // 出勤状态
+                        &.present {
+                            background: #e8f5e8;
+                            border-color: @success-color;
+                            
+                            .sl-checkstudents-student-status {
+                                background: @success-color;
+                                color: @white;
+                            }
+                        }
+                        
+                        // 可点击状态
+                        &.clickable {
+                            cursor: pointer;
+                            
+                            &:hover {
+                                transform: translateY(-2px);
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 控制按钮区域
+        .sl-checkstudents-controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            text-align: right;
+            
+            .sl-checkstudents-start-btn {
+                background: @primary-color;
+                color: @white;
+                border: none;
+                border-radius: @border-radius;
+                padding: 12px 24px;
+                font-size: @font-size-large;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                
+                &:hover {
+                    background: darken(@primary-color, 10%);
+                }
+            }
+            
+            .sl-checkstudents-action-buttons {
+                display: block;
+                
+                .sl-checkstudents-batch-btn {
+                    background: @warning-color;
+                    color: @white;
+                    border: none;
+                    border-radius: @border-radius;
+                    padding: 8px 16px;
+                    font-size: @font-size-base;
+                    cursor: pointer;
+                    margin: 0 5px 10px 0;
+                    transition: background-color 0.3s ease;
+                    
+                    &:hover {
+                        background: darken(@warning-color, 10%);
+                    }
+                }
+                
+                .sl-checkstudents-submit-btn {
+                    background: @success-color;
+                    color: @white;
+                    border: none;
+                    border-radius: @border-radius;
+                    padding: 12px 24px;
+                    font-size: @font-size-large;
+                    font-weight: 500;
+                    cursor: pointer;
+                    display: block;
+                    margin-top: 10px;
+                    transition: background-color 0.3s ease;
+                    
+                    &:hover {
+                        background: darken(@success-color, 10%);
+                    }
+                }
+            }
+            
+            .sl-checkstudents-modify-btn {
+                background: @warning-color;
+                color: @white;
+                border: none;
+                border-radius: @border-radius;
+                padding: 12px 24px;
+                font-size: @font-size-large;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                
+                &:hover {
+                    background: darken(@warning-color, 10%);
+                }
+            }
+        }
+    }
+    
+    // 底部统计区域
+    .sl-checkstudents-footer {
+        background: @white;
+        border-radius: @border-radius;
+        box-shadow: @shadow;
+        padding: 20px 30px;
+        
+        .sl-checkstudents-stats {
+            text-align: center;
+            
+            .sl-checkstudents-stats-title {
+                font-size: @font-size-xl;
+                font-weight: 600;
+                color: @gray-dark;
+                margin-bottom: 15px;
+            }
+            
+            .sl-checkstudents-stats-row {
+                display: block;
+                
+                .sl-checkstudents-stat-item {
+                    display: inline-block;
+                    margin: 0 20px;
+                    font-size: @font-size-large;
+                    color: @gray-dark;
+                    
+                    strong {
+                        font-weight: 600;
+                        font-size: @font-size-xl;
+                    }
+                    
+                    &.present strong {
+                        color: @success-color;
+                    }
+                    
+                    &.absent strong {
+                        color: @danger-color;
+                    }
+                    
+                    &.rate strong {
+                        color: @primary-color;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+    .sl-checkstudents {
+        padding: 10px;
+        
+        .sl-checkstudents-header {
+            padding: 15px 20px;
+            
+            .sl-checkstudents-class-info {
+                .sl-checkstudents-class-title {
+                    font-size: @font-size-xl;
+                }
+                
+                .sl-checkstudents-info-row {
+                    .sl-checkstudents-teacher,
+                    .sl-checkstudents-time {
+                        display: block;
+                        margin: 5px 0;
+                    }
+                }
+            }
+        }
+        
+        .sl-checkstudents-content {
+            padding: 20px 15px;
+            
+            .sl-checkstudents-student-grid {
+                .sl-checkstudents-student-row {
+                    .sl-checkstudents-student-cell {
+                        width: 120px;
+                        margin: 0 8px;
+                        
+                        .sl-checkstudents-student-card {
+                            padding: 10px 5px;
+                            
+                            .sl-checkstudents-student-avatar {
+                                font-size: 24px;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            .sl-checkstudents-controls {
+                position: static;
+                text-align: center;
+                margin-top: 20px;
+            }
+        }
+        
+        .sl-checkstudents-footer {
+            padding: 15px 20px;
+            
+            .sl-checkstudents-stats {
+                .sl-checkstudents-stats-row {
+                    .sl-checkstudents-stat-item {
+                        display: block;
+                        margin: 8px 0;
+                    }
+                }
+            }
+        }
+    }
+} 
