@@ -1,0 +1,50 @@
+<svg width="80" height="54" viewBox="0 0 80 54" xmlns="http://www.w3.org/2000/svg">
+  <!-- 圆角矩形背景 - 橙红色渐变 -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B4A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF4757;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 主背景 -->
+  <rect x="0" y="0" width="80" height="54" rx="14" ry="14" fill="url(#bgGradient)"/>
+  
+  <!-- 剪贴板底板 -->
+  <rect x="16" y="8" width="48" height="40" rx="3" ry="3" fill="#F4C430"/>
+  
+  <!-- 剪贴板夹子 -->
+  <rect x="34" y="4" width="12" height="6" rx="2" ry="2" fill="#5A5A5A"/>
+  
+  <!-- 白色纸张 -->
+  <rect x="19" y="12" width="42" height="34" rx="2" ry="2" fill="#FFFFFF"/>
+  
+  <!-- 时钟背景圆形 -->
+  <circle cx="40" cy="25" r="7" fill="#4A90E2"/>
+  
+  <!-- 时钟指针 -->
+  <line x1="40" y1="20" x2="40" y2="25" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="40" y1="25" x2="44" y2="25" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- 时钟刻度 -->
+  <circle cx="40" cy="19" r="0.7" fill="#FFFFFF"/>
+  <circle cx="40" cy="31" r="0.7" fill="#FFFFFF"/>
+  <circle cx="34" cy="25" r="0.7" fill="#FFFFFF"/>
+  <circle cx="46" cy="25" r="0.7" fill="#FFFFFF"/>
+  
+  <!-- 任务列表 - 红色圆点 -->
+  <circle cx="24" cy="35" r="2" fill="#E74C3C"/>
+  
+  <!-- 任务列表 - 绿色圆点 -->
+  <circle cx="24" cy="41" r="2" fill="#2ECC71"/>
+  
+  <!-- 任务列表 - 文本线条 -->
+  <rect x="29" y="34" width="22" height="1.5" rx="0.5" fill="#333333"/>
+  <rect x="29" y="40" width="22" height="1.5" rx="0.5" fill="#333333"/>
+  
+  <!-- 绿色勾选标记背景 -->
+  <circle cx="60" cy="18" r="5" fill="#2ECC71"/>
+  
+  <!-- 勾选标记 -->
+  <path d="M 57.5 18 L 59 19.5 L 62.5 16" stroke="#FFFFFF" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg> 
