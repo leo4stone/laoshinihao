@@ -1,0 +1,258 @@
+// PDF预览窗口组件样式
+.pdf-viewer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -350px;
+    margin-left: -400px;
+    z-index: 5;
+    
+    .pdf-window {
+        width: 800px;
+        height: 700px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        overflow: hidden;
+        border: 1px solid #d0d0d0;
+        
+        .window-header {
+            background: #e8e8e8;
+            padding: 10px 15px;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+            
+            .window-controls {
+                display: flex;
+                gap: 8px;
+                
+                .control-btn {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    border: none;
+                    
+                    &.close {
+                        background: #ff5f57;
+                        
+                        &:hover {
+                            background: #ff3b30;
+                        }
+                    }
+                    
+                    &.minimize {
+                        background: #ffbd2e;
+                    }
+                    
+                    &.maximize {
+                        background: #28ca42;
+                    }
+                }
+            }
+            
+            .window-title {
+                margin: 0;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+                flex: 1;
+                text-align: center;
+            }
+            
+            .window-actions {
+                display: flex;
+                gap: 5px;
+                
+                .action-btn {
+                    background: none;
+                    border: none;
+                    font-size: 14px;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    .transition();
+                    
+                }
+            }
+        }
+        
+        .pdf-toolbar {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 36px;
+            
+            .nav-controls {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                
+                .nav-btn {
+                    background: #ffffff;
+                    border: 1px solid #c0c0c0;
+                    width: 32px;
+                    height: 28px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    .transition();
+                    
+                    &:hover:not(:disabled) {
+                        background: #e8e8e8;
+                    }
+                    
+                    &:disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                    }
+                }
+                
+                .page-info {
+                    font-size: 13px;
+                    color: #333;
+                    min-width: 60px;
+                    text-align: center;
+                }
+            }
+            
+            .zoom-controls {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                
+                .zoom-btn {
+                    background: #ffffff;
+                    border: 1px solid #c0c0c0;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    .transition();
+                    
+                    &:hover:not(:disabled) {
+                        background: #e8e8e8;
+                    }
+                    
+                    &:disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                    }
+                }
+                
+                .zoom-info {
+                    font-size: 13px;
+                    color: #333;
+                    min-width: 50px;
+                    text-align: center;
+                }
+            }
+            
+            .view-controls {
+                display: flex;
+                gap: 2px;
+                
+                .view-btn {
+                    background: #ffffff;
+                    border: 1px solid #c0c0c0;
+                    width: 32px;
+                    height: 28px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    .transition();
+                }
+            }
+        }
+        
+        .pdf-content {
+            padding: 20px;
+            height: calc(100% - 116px);
+            overflow: auto;
+            background: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            
+            .pdf-page {
+                background: #ffffff;
+                width: 600px;
+                min-height: 800px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border-radius: 4px;
+                padding: 40px;
+                margin: 20px 0;
+                transform-origin: center top;
+                .transition(transform, 0.3s);
+                
+                .page-header {
+                    border-bottom: 2px solid #333;
+                    padding-bottom: 20px;
+                    margin-bottom: 30px;
+                    
+                    h2 {
+                        margin: 0 0 10px 0;
+                        font-size: 24px;
+                        font-weight: 600;
+                        color: #333;
+                        text-align: center;
+                    }
+                    
+                    .page-meta {
+                        display: flex;
+                        justify-content: center;
+                        gap: 30px;
+                        font-size: 14px;
+                        color: #666;
+                    }
+                }
+                
+                .page-content {
+                    .discussion-item {
+                        margin-bottom: 25px;
+                        display: flex;
+                        gap: 15px;
+                        
+                        .speaker {
+                            font-weight: 600;
+                            color: #2c3e50;
+                            min-width: 60px;
+                            font-size: 14px;
+                        }
+                        
+                        .content {
+                            flex: 1;
+                            line-height: 1.6;
+                            font-size: 14px;
+                            color: #333;
+                            text-align: justify;
+                        }
+                    }
+                }
+                
+                .page-footer {
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 1px solid #ddd;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #666;
+                }
+            }
+        }
+    }
+} 

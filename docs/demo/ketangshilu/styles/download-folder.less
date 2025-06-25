@@ -1,0 +1,198 @@
+// 下载文件夹窗口组件样式
+.download-folder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -250px;
+    margin-left: -300px;
+    z-index: 5;
+    
+    .folder-window {
+        width: 600px;
+        height: 500px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        overflow: hidden;
+        border: 1px solid #d0d0d0;
+        
+        .window-header {
+            background: #f6f6f6;
+            padding: 10px 15px;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+            
+            .window-controls {
+                display: flex;
+                gap: 8px;
+                
+                .control-btn {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    border: none;
+                    
+                    &.close {
+                        background: #ff5f57;
+                        
+                        &:hover {
+                            background: #ff3b30;
+                        }
+                    }
+                    
+                    &.minimize {
+                        background: #ffbd2e;
+                    }
+                    
+                    &.maximize {
+                        background: #28ca42;
+                    }
+                }
+            }
+            
+            .window-title {
+                margin: 0;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+                flex: 1;
+                text-align: center;
+            }
+            
+            .window-actions {
+                display: flex;
+                gap: 5px;
+                
+                .action-btn {
+                    background: none;
+                    border: none;
+                    font-size: 14px;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    .transition();
+                }
+            }
+        }
+        
+        .window-toolbar {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            height: 36px;
+            
+            .nav-buttons {
+                display: flex;
+                gap: 4px;
+                
+                .nav-btn {
+                    background: #ffffff;
+                    border: 1px solid #c0c0c0;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    .transition();
+                }
+            }
+            
+            .address-bar {
+                flex: 1;
+                background: #ffffff;
+                border: 1px solid #c0c0c0;
+                border-radius: 4px;
+                padding: 6px 10px;
+                
+                .address-text {
+                    font-size: 13px;
+                    color: #333;
+                }
+            }
+            
+            .view-options {
+                display: flex;
+                gap: 2px;
+                
+                .view-btn {
+                    background: #ffffff;
+                    border: 1px solid #c0c0c0;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    .transition();
+                    
+                    &.active {
+                        background: #0078d4;
+                        color: white;
+                        border-color: #0078d4;
+                    }
+                }
+            }
+        }
+        
+        .window-content {
+            padding: 15px;
+            height: calc(100% - 116px);
+            overflow-y: auto;
+            background: #ffffff;
+            
+            .file-list {
+                .file-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 8px 12px;
+                    border-radius: 4px;
+                    .transition();
+                    
+                    &:hover {
+                        background: #f0f8ff;
+                    }
+                    
+                    .file-icon {
+                        font-size: 32px;
+                        color: #d32f2f;
+                    }
+                    
+                    .file-info {
+                        flex: 1;
+                        
+                        .file-name {
+                            font-size: 14px;
+                            font-weight: 500;
+                            color: #333;
+                            margin-bottom: 2px;
+                        }
+                        
+                        .file-details {
+                            display: flex;
+                            gap: 15px;
+                            font-size: 12px;
+                            color: #666;
+                            
+                            .file-size {
+                                
+                            }
+                            
+                            .file-date {
+                                
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+} 
