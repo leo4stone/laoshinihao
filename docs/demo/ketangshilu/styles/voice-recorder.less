@@ -1,4 +1,15 @@
 // 语音实录窗口组件样式
+
+// 录音闪烁动画
+@keyframes recording-blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.3;
+    }
+}
+
 .voice-recorder {
     position: absolute;
     top: 50%;
@@ -305,6 +316,7 @@
                     
                     .recording-icon {
                         font-size: 18px;
+                        animation: recording-blink 1.5s infinite;
                     }
                 }
             }

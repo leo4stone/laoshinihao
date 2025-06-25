@@ -14,11 +14,10 @@ const app = createApp({
     template: `
         <div class="slides">
             <!-- 第一张幻灯片 显示桌面 -->
-            <section>
+            <section data-auto-animate>
                 <wallpaper></wallpaper>
                 <a href="#/1"><app-icon-button></app-icon-button></a>
                 <guide-arrow 
-                    :showstate="[0, 0, 0]"
                     direction="down"
                     :arrow-style="{
                         position: 'absolute',
@@ -31,12 +30,11 @@ const app = createApp({
             </section>
             
             <!-- 第二张幻灯片 显示默认界面 -->
-            <section>
+            <section data-auto-animate>
                 <wallpaper></wallpaper>
                 <app-icon-button></app-icon-button>
                 <voice-recorder></voice-recorder>
                 <guide-arrow 
-                    :showstate="[1, 0, undefined]"
                     direction="right"
                     :arrow-style="{
                         position: 'absolute',
@@ -49,12 +47,11 @@ const app = createApp({
             </section>
             
             <!-- 第三张幻灯片 显示录音过程 -->
-            <section>
+            <section data-auto-animate>
                 <wallpaper></wallpaper>
                 <app-icon-button></app-icon-button>
                 <voice-recorder :is-recording="true"></voice-recorder>
                 <guide-arrow 
-                    :showstate="[2, 0, undefined]"
                     direction="right"
                     :arrow-style="{
                         position: 'absolute',
@@ -68,7 +65,7 @@ const app = createApp({
             </section>
             
             <!-- 第四张幻灯片 显示录音内容动画过程 -->
-            <section data-autoslide="600">
+            <section data-auto-animate data-autoslide="600">
                 <wallpaper></wallpaper>
                 <app-icon-button></app-icon-button>
                 <voice-recorder :has-messages="true" :enable-fragment="true"></voice-recorder>
@@ -80,7 +77,6 @@ const app = createApp({
                 <app-icon-button></app-icon-button>
                 <voice-recorder :has-messages="true" :enable-selection="true"></voice-recorder>
                 <guide-arrow 
-                    :showstate="[4, 0, undefined]"
                     direction="right"
                     :arrow-style="{
                         position: 'absolute',
@@ -94,13 +90,12 @@ const app = createApp({
             </section>
 
             <!-- 第六张幻灯片 总结结果 -->
-            <section>
+            <section data-auto-animate>
                 <wallpaper></wallpaper>
                 <app-icon-button></app-icon-button>
                 <voice-recorder :has-messages="true"></voice-recorder>
                 <summary-result></summary-result>
                 <guide-arrow 
-                    :showstate="[5, 0, undefined]"
                     direction="down"
                     :arrow-style="{
                         position: 'absolute',
@@ -131,14 +126,6 @@ const app = createApp({
                     }">
                 </navigation-button>
                 <summary-result :transparent="true"></summary-result>
-                <div class="fragment dialogue-text dialogue-blue">
-                    老师，我觉得AI可以帮助我们个性化学习。
-                    比如根据我的学习进度和弱项，推荐适合的练习题。我用过一些学习APP，确实很有针对性。
-                </div>
-                <div class="fragment dialogue-text dialogue-green">
-                    我同意李明的观点，而且AI还能24小时回答问题，不像老师需要休息。
-                    不过有时候AI的回答不够准确，特别是涉及到复杂概念的时候。
-                </div>
                 <guide-arrow 
                     :showstate="[6, 0, -1]"
                     direction="down"
@@ -151,6 +138,13 @@ const app = createApp({
                         zIndex: 20
                     }">
                 </guide-arrow>
+
+
+                
+                <div class="fragment dialogue-text dialogue-blue">
+                    老师，我觉得AI可以帮助我们个性化学习。
+                    比如根据我的学习进度和弱项，推荐适合的练习题。我用过一些学习APP，确实很有针对性。
+                </div>
                 <guide-arrow 
                     :showstate="[6, 0, 0]"
                     direction="down"
@@ -163,6 +157,12 @@ const app = createApp({
                         zIndex: 20
                     }">
                 </guide-arrow>
+
+
+                <div class="fragment dialogue-text dialogue-green">
+                    我同意李明的观点，而且AI还能24小时回答问题，不像老师需要休息。
+                    不过有时候AI的回答不够准确，特别是涉及到复杂概念的时候。
+                </div>
                 <guide-arrow 
                     :showstate="[6, 0, 1]"
                     direction="down"
@@ -178,13 +178,12 @@ const app = createApp({
             </section>
 
             <!-- 第八张幻灯片 下载文件夹 -->
-            <section>
+            <section data-auto-animate>
                 <wallpaper></wallpaper>
-                <app-icon-button></app-icon-button>
+                <a href="#"><app-icon-button></app-icon-button></a>
                 <voice-recorder :has-messages="true"></voice-recorder>
                 <download-folder></download-folder>
-                <guide-arrow 
-                    :showstate="[7, 0, undefined]"
+                <guide-arrow
                     direction="up"
                     :arrow-style="{
                         position: 'absolute',
@@ -198,14 +197,13 @@ const app = createApp({
             </section>
 
             <!-- 第九张幻灯片 预览PDF -->
-            <section>
+            <section data-auto-animate>
                 <wallpaper></wallpaper>
                 <a href="#"><app-icon-button></app-icon-button></a>
                 <voice-recorder :has-messages="true"></voice-recorder>
                 <download-folder></download-folder>
                 <pdf-viewer></pdf-viewer>
                 <guide-arrow 
-                    :showstate="[8, 0, undefined]"
                     direction="right"
                     :arrow-style="{
                         position: 'absolute',

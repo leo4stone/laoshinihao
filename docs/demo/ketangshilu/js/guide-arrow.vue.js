@@ -3,7 +3,7 @@ export const GuideArrow = {
     props: {
         showstate: {
             type: Array,
-            default: () => [0, undefined, undefined]
+            default: () => null
         },
         arrowStyle: {
             type: Object,
@@ -21,12 +21,26 @@ export const GuideArrow = {
     },
     computed: {
         isVisible() {
-            const targetState = this.showstate;
+            const targetStates = this.showstate;
             const current = this.currentState;
-            console.log("current/targetState",current,targetState);
-            // 检查是否匹配目标状态
-
-            return this.matchState(current, targetState);
+            console.log("current/targetStates",current,targetStates);
+            
+            // 如果没有传入 showstate 或者为 null，则一直显示
+            if (!targetStates || targetStates === null) {
+                return true;
+            }
+            
+            // 检查 showstate 的格式
+            if (targetStates.length === 0) return false;
+            
+            // 如果第一个元素是数组，说明是多状态格式 [[1,1,1],[1,1,2]]
+            if (Array.isArray(targetStates[0])) {
+                // 检查是否匹配任何一个目标状态
+                return targetStates.some(targetState => this.matchState(current, targetState));
+            } else {
+                // 单状态格式 [1,2,3]
+                return this.matchState(current, targetStates);
+            }
         },
         rotateAngle() {
             const directions = {
@@ -39,8 +53,12 @@ export const GuideArrow = {
         },
         computedStyle() {
             return {
-                ...this.arrowStyle,
-                transform: `rotate(${this.rotateAngle}deg)`
+                ...this.arrowStyle
+            };
+        },
+        imageStyle() {
+            return {
+                transform: `rotate(${this.rotateAngle}deg) !important`
             };
         }
     },
@@ -86,8 +104,9 @@ export const GuideArrow = {
         <div 
             v-if="isVisible"
             class="guide-arrow"
+            data-id="guide-arrow"
             :style="computedStyle">
-            <img src="images/guide_arrow.svg" alt="引导箭头" class="arrow-image">
+            <img src="images/guide_arrow.svg" alt="引导箭头" class="arrow-image" :style="imageStyle" data-auto-animate-restart>
         </div>
     `
 }; 
